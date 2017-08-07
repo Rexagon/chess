@@ -1,6 +1,58 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="CommandPacket.cpp">
+      <Filter>server\packets</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketHandler.cpp">
+      <Filter>server\packets</Filter>
+    </ClCompile>
+    <ClCompile Include="Truelog.cpp">
+      <Filter>server\truelog</Filter>
+    </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Server.cpp">
+      <Filter>server</Filter>
+    </ClCompile>
+    <ClCompile Include="User.cpp">
+      <Filter>server\user</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CommandPacket.h">
+      <Filter>server\packets</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketHandler.h">
+      <Filter>server\packets</Filter>
+    </ClInclude>
+    <ClInclude Include="Truelog.h">
+      <Filter>server\truelog</Filter>
+    </ClInclude>
+    <ClInclude Include="Server.h">
+      <Filter>server</Filter>
+    </ClInclude>
+    <ClInclude Include="User.h">
+      <Filter>server\user</Filter>
+    </ClInclude>
+    <ClInclude Include="Room.h">
+      <Filter>server\room</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="server">
+      <UniqueIdentifier>{eb0873b1-6ca3-436a-b08c-adb34eed6a98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="server\truelog">
+      <UniqueIdentifier>{91473e97-f753-4fa7-bdb3-a0626d14a4c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="server\packets">
+      <UniqueIdentifier>{d5227c96-c30c-4431-857e-44fffc30b6ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="server\user">
+      <UniqueIdentifier>{edc94866-0383-429c-a6bd-dae2a6daf63a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="server\room">
+      <UniqueIdentifier>{decc7f97-ba02-4f4c-917a-66707965ad29}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>
