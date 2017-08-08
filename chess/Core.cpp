@@ -11,6 +11,8 @@ void Core::init()
 
 	AssetManager::load("data/data.json");
 
+	Client::init("95.84.247.9", 49876);
+
 	m_is_running = false;
 
 	sf::ContextSettings settings;

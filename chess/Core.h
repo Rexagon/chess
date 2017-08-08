@@ -5,6 +5,7 @@
 
 #include "AssetManager.h"
 #include "SoundManager.h"
+#include "Client.h"
 #include "Cursor.h"
 #include "State.h"
 #include "Input.h"

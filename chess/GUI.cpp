@@ -38,7 +38,8 @@ void GUI::update(const float dt)
 				if (i == 0) {
 					widget->m_layout->update();
 				}
-				if (children[i]->get_rect().contains(mouse_position.x, mouse_position.y)) {
+				if (children[i]->get_rect().contains(mouse_position.x, mouse_position.y) &&
+					children[i]->is_visible()) {
 					itemIndex = i;
 					hovered_item = children[i].get();
 				}
