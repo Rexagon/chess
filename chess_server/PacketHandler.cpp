@@ -1,20 +1,50 @@
 #include "PacketHandler.h"
 
 #include "Server.h"
+#include "User.h"
+#include "Room.h"
 
-PacketHandler::PacketHandler(Server * server) : m_is_run(false), m_server(server)
+PacketHandler::PacketHandler(Server * server) : m_server(server)
 {
-	m_packets_handler_thread = std::thread(&PacketHandler::Handler, this);
+	m_events = {
+		{
+			CommandPacket::EnterRoom,
+			[](User* user, CommandPacket packet) {
+				user->set_role(User::Role::Spectator);
+				user->get_room()->get_users_list().push_back(user);
+			}
+		},
+
+		{
+			CommandPacket::LeaveRoom,
+			[](User* user, CommandPacket packet) {
+				for (std::list<User*>::iterator it = user->get_room()->get_users_list().begin(); it != user->get_room()->get_users_list().end(); it++) {
+					if (user == (*it)) {
+						user->get_room()->get_users_list().erase(it);
+						break;
+					}
+				}
+			}
+		},
+
+		{
+			CommandPacket::SendMessage,
+			[](User* user, CommandPacket packet) {
+				for (std::list<User*>::iterator it = user->get_room()->get_users_list().begin(); it != user->get_room()->get_users_list().end(); it++) {
+					(*it)->get_socket()->send(packet.to_sfml_packet());
+				}
+			}
+		}
+	};
 }
 
 void PacketHandler::start()
 {
+	m_packets_handler_thread = std::thread(&PacketHandler::handler, this);
+
 	Truelog::stream(Truelog::StreamType::File) << Truelog::Type::Info << "Start PacketHandler";
 
 	m_server->m_socket_selector.add(m_server->m_listener);
-
-	m_is_run = true;
-	m_condition_handling.notify_all();
 }
 
 void PacketHandler::stop()
@@ -22,54 +52,20 @@ void PacketHandler::stop()
 	Truelog::stream(Truelog::StreamType::File) << Truelog::Type::Info << "Stop PacketHandler";
 
 	m_server->m_socket_selector.clear();
-
-	m_is_run = false;
-	m_condition_handling.notify_all();
 }
 
-std::pair<User*, sf::Packet> * PacketHandler::pull_packet()
+void PacketHandler::send(User* user, CommandPacket packet)
 {
-	std::unique_lock<std::mutex> lock(m_queue_mutex);
-	if (m_packets_queue.empty()) {
-		return nullptr;
-	}
-	else {
-		m_packet_back = m_packets_queue.back();
-		m_packets_queue.pop();
-		return &m_packet_back;
-	}
-}
-
-void PacketHandler::send(User* user, sf::Packet packet)
-{
-	m_status = user->get_socket()->send(packet);
+	sf::Socket::Status status = user->get_socket()->send(packet.to_sfml_packet());
 
 	Truelog::sync_print([&]() {
-		Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Info << "Packet was sent to server (status=" << m_status << ")";
+		Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Info << "Packet was sent to server (status=" << status << ")";
 	});
 }
 
-const sf::Socket::Status PacketHandler::get_status() const
+void PacketHandler::handler()
 {
-	return m_status;
-}
-
-bool PacketHandler::has_packets()
-{
-	if (m_packets_queue.empty()) {
-		return false;
-	}
-	else {
-		return true;
-	}
-}
-
-void PacketHandler::Handler()
-{
-	std::unique_lock<std::mutex> handler_lock(m_handler_mutex);
-
 	while (m_server->m_is_run) {
-		m_condition_handling.wait(handler_lock, [this]() { return m_is_run; });
 		if (m_server->m_socket_selector.wait(sf::milliseconds(5))) {
 			if (m_server->m_socket_selector.isReady(m_server->m_listener)) {
 				std::shared_ptr<sf::TcpSocket> userSocket = std::make_shared<sf::TcpSocket>();
@@ -85,84 +81,66 @@ void PacketHandler::Handler()
 				}
 			}
 			else {
-				for (std::list<std::unique_ptr<User>>::iterator it = m_server->m_users.begin(); it != m_server->m_users.end();) {
-					if (m_server->m_socket_selector.isReady(*(*it)->get_socket())) {
-						sf::Packet packet;
-						m_status = (*it)->get_socket()->receive(packet);
+				for (std::list<std::unique_ptr<User>>::iterator it_users = m_server->m_users.begin(); it_users != m_server->m_users.end();) {
+					if (m_server->m_socket_selector.isReady(*(*it_users)->get_socket())) {
+						sf::Packet sf_packet;
+						sf::Socket::Status packet_status = (*it_users)->get_socket()->receive(sf_packet);
+
+						CommandPacket packet(sf_packet);
 
 						Truelog::sync_print([&]() {
-							Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Info << "Packet was received (status=" << m_status << ", size=" << packet.getDataSize() << ")";
+							Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Info << "Packet was received (status=" << packet_status << ", size=" << sf_packet.getDataSize() << ")";
 						});
 
-						if (m_status == sf::Socket::Done) {
-							std::unique_lock<std::mutex> packet_lock(m_queue_mutex);
-							m_packets_queue.push(std::pair<User*, sf::Packet>((*it).get(), packet));
+						if (packet_status == sf::Socket::Done) {
+							if (packet.is_valid()) {
+								std::map<signed char, std::function<void(User*, CommandPacket)>>::iterator it_event = m_events.find(packet.get_command());
 
-							// Check events
-							if (m_events.size() > 0) {
-								sf::Packet tmp_packet = packet;
-								sf::Int8 type;
-
-								if (tmp_packet >> type) {
-									std::unique_lock<std::mutex> event_lock(m_events_mutex);
-									for (std::vector<std::pair<sf::Int8, std::function<void(sf::Packet*)>>>::iterator it = m_events.begin(); it != m_events.end(); it++)
-									{
-										if (type == it->first) {
-											m_packet_back = m_packets_queue.back();
-											m_packets_queue.pop();
-											it->second(&m_packet_back.second);
-											m_events.erase(it);
-											break;
-										}
-									}
+								if (it_event != m_events.end()) {
+									std::thread(it_event->second, it_users->get(), packet).detach();
 								}
 							}
-							it++;
+
+							it_users++;
 						}
-						else if (m_status == sf::Socket::Disconnected) {
+						else if (packet_status == sf::Socket::Disconnected) {
 
 							Truelog::sync_print([&]() {
 								Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Debug << "Removing user from his room...";
 							});
 
-							if ((*it)->get_room() != nullptr) {
-								///(*it)->get_room()->HandleDisconnection(*(*it));
+							if ((*it_users)->get_room() != nullptr) {
+								m_events[CommandPacket::Type::LeaveRoom](it_users->get(), packet);
 							}
 
 							Truelog::sync_print([&]() {
 								Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Debug << "Remove socket from socket selector...";
 							});
 
-							m_server->m_socket_selector.remove(*(*it)->get_socket());
+							m_server->m_socket_selector.remove(*(*it_users)->get_socket());
 
 							Truelog::sync_print([&]() {
 								Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Debug << "Disconnect socket...";
 							});
 
-							(*it)->get_socket()->disconnect();
+							(*it_users)->get_socket()->disconnect();
 
 							Truelog::sync_print([&]() {
 								Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Debug << "Remove user from user list...";
 							});
 
 							Truelog::sync_print([&]() {
-								Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Info << "User was disconnected from server (ip=" << (*it)->get_socket()->getRemoteAddress().toString() << ")";
+								Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Info << "User was disconnected from server (ip=" << (*it_users)->get_socket()->getRemoteAddress().toString() << ")";
 							});
 
-							it = m_server->m_users.erase(it);
+							it_users = m_server->m_users.erase(it_users);
 						}
 					}
 					else {
-						it++;
+						it_users++;
 					}
 				}
 			}
 		}
 	}
-}
-
-void PacketHandler::single_packet_event(sf::Int8 type, std::function<void(sf::Packet*)> callback)
-{
-	std::unique_lock<std::mutex> lock(m_events_mutex);
-	m_events.push_back(std::pair<sf::Int8, std::function<void(sf::Packet*)>>(type, callback));
 }

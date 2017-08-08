@@ -17,6 +17,9 @@
     <ClCompile Include="User.cpp">
       <Filter>server\user</Filter>
     </ClCompile>
+    <ClCompile Include="Room.cpp">
+      <Filter>server\room</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommandPacket.h">

@@ -4,21 +4,25 @@
 
 #include <SFML/Network.hpp>
 
-enum Command {
-	Login,
-	Logout,
-	EnterRoom,
-	LeaveRoom,
-	SendMessage,
-	UserConnected,
-	UserDisconnected
-};
-
 class CommandPacket
 {
 public:
+	enum Type {
+		Login,
+		Logout,
+		EnterRoom,
+		LeaveRoom,
+		SendMessage,
+		UserConnected,
+		UserDisconnected, // is handl
+
+		TypesCount
+	};
+
 	CommandPacket(sf::Packet packet);
 	CommandPacket(signed char command, const std::vector<std::string>& arguments);
+
+	CommandPacket& operator =(const CommandPacket& packet);
 
 	sf::Packet to_sfml_packet() const;
 

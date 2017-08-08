@@ -8,11 +8,22 @@ CommandPacket::CommandPacket(sf::Packet packet)
 	while (packet >> argument) {
 		m_arguments.push_back(argument);
 	}
+
+	m_is_valid &= packet.endOfPacket();
 }
 
 CommandPacket::CommandPacket(signed char command, const std::vector<std::string>& arguments) :
 	m_command(command), m_arguments(arguments)
 {
+}
+
+CommandPacket & CommandPacket::operator =(const CommandPacket & packet)
+{
+	this->m_is_valid = packet.m_is_valid;
+	this->m_command = packet.m_command;
+	this->m_arguments = packet.m_arguments;
+
+	return *this;
 }
 
 sf::Packet CommandPacket::to_sfml_packet() const

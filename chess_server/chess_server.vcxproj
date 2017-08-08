@@ -88,6 +88,7 @@
     <ClCompile Include="CommandPacket.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PacketHandler.cpp" />
+    <ClCompile Include="Room.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="Truelog.cpp" />
     <ClCompile Include="User.cpp" />
