@@ -23,11 +23,11 @@ public:
 
 	// Привязывает фабрику ресурса к его уникальному названию
 	template<class T, class... Args>
-	static void bind(const std::string& name, Args&&... factoryArguments)
+	static void bind(const std::string& name, Args&&... factory_arguments)
 	{
 		auto it = m_factories.find(name);
 		if (it == m_factories.end()) {
-			m_factories[name] = std::unique_ptr<T>(new T(std::forward<Args>(factoryArguments)...));
+			m_factories[name] = std::unique_ptr<T>(new T(std::forward<Args>(factory_arguments)...));
 		}
 	}
 
@@ -44,7 +44,7 @@ public:
 			return nullptr;
 		}
 		else {
-			return reinterpret_cast<T*>(it->second->load()->getData());
+			return reinterpret_cast<T*>(it->second->load()->get_data());
 		}
 	}
 

@@ -5,43 +5,47 @@
 class Label : public Widget
 {
 public:
-	Label(const std::string& text = std::string(), sf::Font* font = nullptr);
+	Label(const std::string& text = std::string());
 
-	void setText(const std::string& text);
-	void setText(const std::wstring& text);
-	std::string GetText() const { return m_geometryText.getString(); }
+	virtual void set_text(const std::string& text);
+	virtual void set_text(const std::wstring& text);
+	virtual sf::String get_text() const { return m_text_geometry.getString(); }
 
-	void setFont(sf::Font* font);
-	sf::Font* getFont() const { return m_font; }
+	void set_font(sf::Font* font);
+	sf::Font* get_font() const { return m_font; }
 
-	void setAlignment(int alignment);
-	int getAlignment() const { return m_alignment; }
+	void set_alignment(int alignment);
+	int get_alignment() const { return m_alignment; }
 
-	void setWordwrapEnabled(bool enabled);
-	bool getWordwrapEnabled() const { return m_wordwrap; }
+	void set_wordwrap_enabled(bool enabled);
+	bool get_wordwrap_enabled() const { return m_wordwrap; }
 
-	void setPadding(float padding);
-	float getPadding() const { return m_padding; }
+	void set_padding(float padding);
+	float get_padding() const { return m_padding; }
 
-	void setColor(const sf::Color& color);
-	sf::Color getColor() const { return m_geometryText.getFillColor(); }
+	void set_color(const sf::Color& color);
+	sf::Color get_color() const { return m_text_geometry.getFillColor(); }
 
-	void setOutlineColor(const sf::Color &color);
-	sf::Color getOutlineColor() const { return m_geometryText.getOutlineColor(); }
+	void set_text_outline_color(const sf::Color &color);
+	sf::Color get_text_outline_color() const { return m_text_geometry.getOutlineColor(); }
 
-	void setOutlineThickness(float thickness);
-	float getOutlineThickness() const { return m_geometryText.getOutlineThickness(); }
+	void set_text_outline_thickness(float thickness);
+	float get_text_outline_thickness() const { return m_text_geometry.getOutlineThickness(); }
 
-	void setFontSize(int size);
-	int getFontSize() const { return m_geometryText.getCharacterSize(); }
+	void set_font_size(int size);
+	int get_font_size() const { return m_text_geometry.getCharacterSize(); }
 
-	void setFontStyle(unsigned int style);
-	unsigned int getFontStyle() const { return m_geometryText.getStyle(); }
+	void set_font_style(unsigned int style);
+	unsigned int get_font_style() const { return m_text_geometry.getStyle(); }
+
+	virtual char get_type() const;
 protected:
-	void onDraw() override;
+	void on_draw() override;
 
 	// Обновляет геометрию
 	void update() override;
+
+	sf::String make_wordwrapped_text(sf::String text);
 
 	sf::Font* m_font;
 	int m_alignment;
@@ -50,5 +54,5 @@ protected:
 
 	sf::Font temp;
 
-	sf::Text m_geometryText;
+	sf::Text m_text_geometry;
 };

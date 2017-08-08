@@ -88,7 +88,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="CommandPacket.cpp" />
     <ClCompile Include="Core.cpp" />
+    <ClCompile Include="Cursor.cpp" />
     <ClCompile Include="FontAsset.cpp" />
     <ClCompile Include="GUI.cpp" />
     <ClCompile Include="HorizontalLayout.cpp" />
@@ -97,10 +99,12 @@
     <ClCompile Include="Layout.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="MusicAsset.cpp" />
     <ClCompile Include="ShaderAsset.cpp" />
     <ClCompile Include="SoundManager.cpp" />
+    <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="TextureAsset.cpp" />
     <ClCompile Include="VerticalLayout.cpp" />
     <ClCompile Include="Widget.cpp" />
@@ -108,7 +112,9 @@
   <ItemGroup>
     <ClInclude Include="Asset.h" />
     <ClInclude Include="AssetManager.h" />
+    <ClInclude Include="CommandPacket.h" />
     <ClInclude Include="Core.h" />
+    <ClInclude Include="Cursor.h" />
     <ClInclude Include="FontAsset.h" />
     <ClInclude Include="GUI.h" />
     <ClInclude Include="HorizontalLayout.h" />
@@ -116,11 +122,13 @@
     <ClInclude Include="Label.h" />
     <ClInclude Include="Layout.h" />
     <ClInclude Include="Log.h" />
+    <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="MusicAsset.h" />
     <ClInclude Include="ShaderAsset.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="State.h" />
+    <ClInclude Include="TextBox.h" />
     <ClInclude Include="TextureAsset.h" />
     <ClInclude Include="VerticalLayout.h" />
     <ClInclude Include="Widget.h" />

@@ -41,10 +41,10 @@ namespace math
 	float clamp(float value, float min, float max);
 
 	// Переводит из градусов в радианы
-	float toRadians(float degrees);
+	float to_radians(float degrees);
 
 	// Переводит из радиан в градусы
-	float toDegrees(float radians);
+	float to_degrees(float radians);
 
 	// Получает значение функции в x, заданной точками
 	//@ используется линейная интерполяция
@@ -67,8 +67,8 @@ namespace math
 	vec2 rotate(const vec2& v, float angle);
 
 	// Возвращает длину проекции b на a
-	float scalarProjection(const vec2& a, const vec2& b);
+	float scalar_projection(const vec2& a, const vec2& b);
 
 	// Возвращает вектор проекции b на a
-	vec2 vectorProjection(const vec2& a, const vec2& b);
+	vec2 vector_projection(const vec2& a, const vec2& b);
 }

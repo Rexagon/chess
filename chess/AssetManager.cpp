@@ -18,38 +18,38 @@ void AssetManager::load(const std::string & path)
 	json data;
 	file >> data;
 
-	std::string dataFolder = path;
-	if (dataFolder.find_last_of('/') > 0) {
-		dataFolder = path.substr(0, path.find_last_of('/'));
+	std::string data_folder = path;
+	if (data_folder.find_last_of('/') > 0) {
+		data_folder = path.substr(0, path.find_last_of('/'));
 	}
-	dataFolder += "/";
+	data_folder += "/";
 
-	auto audioData = data["audio"];
-	if (audioData.is_object()) {
-		std::string resourceFolder = "audio/";
-		for (auto it = audioData.begin(); it != audioData.end(); ++it) {
+	auto audio_data = data["audio"];
+	if (audio_data.is_object()) {
+		std::string resource_folder = "audio/";
+		for (auto it = audio_data.begin(); it != audio_data.end(); ++it) {
 			const json& value = it.value();
 			if (value.is_string()) {
-				AssetManager::bind<MusicFactory>(it.key(), dataFolder + resourceFolder + value.get<std::string>());
+				AssetManager::bind<MusicFactory>(it.key(), data_folder + resource_folder + value.get<std::string>());
 			}
 		}
 	}
 
-	auto fontsData = data["fonts"];
-	if (fontsData.is_object()) {
-		std::string resourceFolder = "fonts/";
-		for (auto it = fontsData.begin(); it != fontsData.end(); ++it) {
+	auto fonts_data = data["fonts"];
+	if (fonts_data.is_object()) {
+		std::string resource_folder = "fonts/";
+		for (auto it = fonts_data.begin(); it != fonts_data.end(); ++it) {
 			const json& value = it.value();
 			if (value.is_string()) {
-				AssetManager::bind<FontFactory>(it.key(), dataFolder + resourceFolder + value.get<std::string>());
+				AssetManager::bind<FontFactory>(it.key(), data_folder + resource_folder + value.get<std::string>());
 			}
 		}
 	}
 
-	auto shadersData = data["shaders"];
-	if (shadersData.is_object()) {
-		std::string resourceFolder = "shaders/";
-		for (auto it = shadersData.begin(); it != shadersData.end(); ++it) {
+	auto shaders_data = data["shaders"];
+	if (shaders_data.is_object()) {
+		std::string resource_folder = "shaders/";
+		for (auto it = shaders_data.begin(); it != shaders_data.end(); ++it) {
 			const json& value = it.value();
 			if (value.is_string()) {
 				std::string extension = value.get<std::string>();
@@ -61,18 +61,18 @@ void AssetManager::load(const std::string & path)
 				else {
 					shaderType = sf::Shader::Vertex;
 				}
-				AssetManager::bind<ShaderFactory>(it.key(), dataFolder + resourceFolder + value.get<std::string>(), shaderType);
+				AssetManager::bind<ShaderFactory>(it.key(), data_folder + resource_folder + value.get<std::string>(), shaderType);
 			}
 		}
 	}
 
-	auto texturesData = data["textures"];
-	if (texturesData.is_object()) {
-		std::string resourceFolder = "textures/";
-		for (auto it = texturesData.begin(); it != texturesData.end(); ++it) {
+	auto textures_data = data["textures"];
+	if (textures_data.is_object()) {
+		std::string resource_folder = "textures/";
+		for (auto it = textures_data.begin(); it != textures_data.end(); ++it) {
 			const json& value = it.value();
 			if (value.is_string()) {
-				AssetManager::bind<TextureFactory>(it.key(), dataFolder + resourceFolder + value.get<std::string>());
+				AssetManager::bind<TextureFactory>(it.key(), data_folder + resource_folder + value.get<std::string>());
 			}
 		}
 	}

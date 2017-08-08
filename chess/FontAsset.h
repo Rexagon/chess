@@ -9,7 +9,7 @@
 class FontAsset : public Asset
 {
 public:
-	void * getData() override {
+	void * get_data() override {
 		return &m_font;
 	}
 

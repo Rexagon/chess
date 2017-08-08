@@ -16,9 +16,10 @@ public:
 	virtual void pause() {}
 	virtual void resume() {}
 
-	virtual void focusLost() {}
-	virtual void focusGained() {}
+	virtual void focus_lost() {}
+	virtual void focus_gained() {}
 
+	virtual void resized(float width, float height) {}
 protected:
 	friend class Core;
 

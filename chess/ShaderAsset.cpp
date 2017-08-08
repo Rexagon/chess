@@ -1,32 +1,32 @@
 #include "ShaderAsset.h"
 
-ShaderFactory::ShaderFactory(const std::string & shaderPath, sf::Shader::Type shaderType) :
+ShaderFactory::ShaderFactory(const std::string & shader_path, sf::Shader::Type shader_type) :
 	m_asset(nullptr)
 {
-	switch (shaderType)
+	switch (shader_type)
 	{
 	case sf::Shader::Vertex:
-		m_vertexShaderPath = shaderPath;
+		m_vertex_shader_path = shader_path;
 		break;
 	case sf::Shader::Geometry:
 		break;
 	case sf::Shader::Fragment:
-		m_fragmentShaderPath = shaderPath;
+		m_fragment_shader_path = shader_path;
 		break;
 	default:
 		break;
 	}
 }
 
-ShaderFactory::ShaderFactory(const std::string & vertexShaderPath, const std::string & fragmentShaderPath) :
-	m_vertexShaderPath(vertexShaderPath), m_fragmentShaderPath(fragmentShaderPath), m_asset(nullptr)
+ShaderFactory::ShaderFactory(const std::string & vertex_shader_path, const std::string & fragment_shader_path) :
+	m_vertex_shader_path(vertex_shader_path), m_fragment_shader_path(fragment_shader_path), m_asset(nullptr)
 {
 }
 
 ShaderFactory::~ShaderFactory()
 {
 	if (m_asset != nullptr) {
-		Log::write("shader deleted: \"" + m_vertexShaderPath + " " + m_fragmentShaderPath + "\"");
+		Log::write("shader deleted: \"" + m_vertex_shader_path + " " + m_fragment_shader_path + "\"");
 	}
 }
 
@@ -37,20 +37,20 @@ Asset * ShaderFactory::load()
 		bool success = false;
 		std::string message;
 
-		bool hasVertexShader = m_vertexShaderPath != "";
-		bool hasFragmentShader = m_fragmentShaderPath != "";
+		bool has_vertex_shader = m_vertex_shader_path != "";
+		bool hasFragmentShader = m_fragment_shader_path != "";
 
-		if (!hasVertexShader && hasFragmentShader) {
-			success = asset->m_shader.loadFromFile(m_fragmentShaderPath, sf::Shader::Fragment);
-			message = "unable to load fragment shader: \"" + m_fragmentShaderPath + "\"";
+		if (!has_vertex_shader && hasFragmentShader) {
+			success = asset->m_shader.loadFromFile(m_fragment_shader_path, sf::Shader::Fragment);
+			message = "unable to load fragment shader: \"" + m_fragment_shader_path + "\"";
 		}
-		else if (hasVertexShader && !hasFragmentShader) {
-			success = asset->m_shader.loadFromFile(m_vertexShaderPath, sf::Shader::Vertex);
-			message = "unable to load vertex shader: \"" + m_vertexShaderPath + "\"";
+		else if (has_vertex_shader && !hasFragmentShader) {
+			success = asset->m_shader.loadFromFile(m_vertex_shader_path, sf::Shader::Vertex);
+			message = "unable to load vertex shader: \"" + m_vertex_shader_path + "\"";
 		}
-		else if (hasVertexShader && hasFragmentShader) {
-			success = asset->m_shader.loadFromFile(m_vertexShaderPath, m_fragmentShaderPath);
-			message = "unable to load shaders: \"" + m_vertexShaderPath + "\" and \"" + m_fragmentShaderPath + "\"";
+		else if (has_vertex_shader && hasFragmentShader) {
+			success = asset->m_shader.loadFromFile(m_vertex_shader_path, m_fragment_shader_path);
+			message = "unable to load shaders: \"" + m_vertex_shader_path + "\" and \"" + m_fragment_shader_path + "\"";
 		}
 		else {
 			message = "unable to load unknown shader";
@@ -58,7 +58,7 @@ Asset * ShaderFactory::load()
 
 		if (success) {
 			m_asset = std::move(asset);
-			Log::write("shader loaded: \"" + m_vertexShaderPath + " " + m_fragmentShaderPath + "\"");
+			Log::write("shader loaded: \"" + m_vertex_shader_path + " " + m_fragment_shader_path + "\"");
 		}
 		else {
 			throw std::runtime_error(message);
@@ -71,7 +71,7 @@ Asset * ShaderFactory::load()
 void ShaderFactory::clear()
 {
 	if (m_asset != nullptr) {
-		Log::write("shader deleted: \"" + m_vertexShaderPath + " " + m_fragmentShaderPath + "\"");
+		Log::write("shader deleted: \"" + m_vertex_shader_path + " " + m_fragment_shader_path + "\"");
 	}
 	m_asset.reset();
 }

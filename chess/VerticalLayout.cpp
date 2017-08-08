@@ -5,39 +5,39 @@
 
 void VerticalLayout::update()
 {
-	vec2 size = m_parent->getSize();
+	vec2 size = m_parent->get_size();
 
-	float rowWidth = size.x - m_spacing * 2.0f;
-	float rowHeight = (size.y - (m_items.size() + 1.0f) * m_spacing) / m_items.size();
-	vec2 rowSize(rowWidth, rowHeight);
+	float row_width = size.x - m_spacing * 2.0f;
+	float row_height = (size.y - (m_items.size() + 1.0f) * m_spacing) / m_items.size();
+	vec2 rowSize(row_width, row_height);
 
 	for (unsigned int i = 0; i < m_items.size(); ++i) {
 		Item& item = m_items[i];
-		item.widget->setSize(rowSize);
-		vec2 itemSize = item.widget->getSize();
+		item.widget->set_size(rowSize);
+		vec2 item_size = item.widget->get_size();
 
-		vec2 itemPosition;
+		vec2 item_position;
 		if (item.alignment & GUI::AlignLeft) {
-			itemPosition.x = m_spacing;
+			item_position.x = m_spacing;
 		}
 		else if (item.alignment & GUI::AlignRight) {
-			itemPosition.x = size.x - m_spacing - itemSize.x;
+			item_position.x = size.x - m_spacing - item_size.x;
 		}
 		else if (item.alignment & GUI::AlignHCenter) {
-			itemPosition.x = (size.x - itemSize.x) / 2.0f;
+			item_position.x = (size.x - item_size.x) / 2.0f;
 		}
 
-		itemPosition.y = (m_spacing + rowHeight) * static_cast<float>(i);
+		item_position.y = (m_spacing + row_height) * static_cast<float>(i);
 		if (item.alignment & GUI::AlignTop) {
-			itemPosition.y += m_spacing;
+			item_position.y += m_spacing;
 		}
 		else if (item.alignment & GUI::AlignBottom) {
-			itemPosition.y += m_spacing + rowHeight - itemSize.y;
+			item_position.y += m_spacing + row_height - item_size.y;
 		}
 		else if (item.alignment & GUI::AlignVCenter) {
-			itemPosition.y += m_spacing + (rowHeight - itemSize.y) / 2.0f;
+			item_position.y += m_spacing + (row_height - item_size.y) / 2.0f;
 		}
 
-		item.widget->setPosition(m_parent->getPosition() + itemPosition);
+		item.widget->set_position(m_parent->get_position() + item_position);
 	}
 }

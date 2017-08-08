@@ -3,110 +3,56 @@
 #include "Core.h"
 #include "GUI.h"
 
-#ifdef __linux__
+#ifdef _WIN32
+#define LOCALE "Russian"
+#elif defined(__linux__)
 #define LOCALE "ru_RU.CP1251"
 #else
-#define LOCALE "Russian"
+#error I don't know the encoding of this OS.
 #endif
 
-Label::Label(const std::string & text, sf::Font* font) :
-    m_font(font), m_wordwrap(false), m_alignment(GUI::AlignCenter), m_padding(0.0f)
+Label::Label(const std::string & text) :
+    m_font(nullptr), m_wordwrap(false), m_alignment(GUI::AlignCenter), m_padding(0.0f)
 {
 	if (m_font == nullptr) {
 		m_font = AssetManager::get<sf::Font>("font_default");
-		m_geometryText.setFont(*m_font);
-		m_geometryText.setString(text);
+		m_text_geometry.setFont(*m_font);
+		m_text_geometry.setString(text);
 	}
 
-	setText(text);
+	set_text(text);
 }
 
-void Label::setText(const std::string & text)
+void Label::set_text(const std::string & text)
 {
-	std::string string = text;
+	set_text(sf::String(text, std::locale(LOCALE)).toWideString());
+}
+
+void Label::set_text(const std::wstring & text)
+{
+	std::wstring string;
 
 	if (m_wordwrap) {
-		unsigned currentOffset = 0;
-		bool firstWord = true;
-		std::size_t wordBegining = 0;
-
-        for (std::size_t pos = 0; pos < string.size(); ++pos) {
-			auto currentChar = string[pos];
-			if (currentChar == '\n') {
-				currentOffset = 0;
-				firstWord = true;
-				continue;
-			}
-			else if (currentChar == ' ') {
-				wordBegining = pos;
-				firstWord = false;
-			}
-
-			sf::Glyph glyph = m_font->getGlyph(currentChar, m_geometryText.getCharacterSize(), m_geometryText.getStyle() & sf::Text::Bold);
-			currentOffset += glyph.advance;
-
-			if (!firstWord && currentOffset > m_geometry.getSize().x) {
-				pos = wordBegining;
-				string[pos] = '\n';
-				firstWord = true;
-				currentOffset = 0;
-			}
-		}
+		string = make_wordwrapped_text(text);
     }
+	else {
+		string = text;
+	}
 
-    m_geometryText.setString(sf::String(string, std::locale(LOCALE)));
-	sf::FloatRect textBounds = m_geometryText.getLocalBounds();
-	setMinimumSize(textBounds.width, textBounds.height);
+	m_text_geometry.setString(string);
+	sf::FloatRect textBounds = m_text_geometry.getLocalBounds();
+	set_minimum_size(textBounds.width, textBounds.height);
 	update();
 }
 
-void Label::setText(const std::wstring & text)
-{
-	std::wstring string = text;
-
-	if (m_wordwrap) {
-		unsigned currentOffset = 0;
-		bool firstWord = true;
-		std::size_t wordBegining = 0;
-
-		for (std::size_t pos(0); pos < string.size(); ++pos) {
-			auto currentChar = string[pos];
-			if (currentChar == '\n') {
-				currentOffset = 0;
-				firstWord = true;
-				continue;
-			}
-			else if (currentChar == ' ') {
-				wordBegining = pos;
-				firstWord = false;
-			}
-
-			sf::Glyph glyph = m_font->getGlyph(currentChar, m_geometryText.getCharacterSize(), m_geometryText.getStyle() & sf::Text::Bold);
-			currentOffset += glyph.advance;
-
-			if (!firstWord && currentOffset > m_geometry.getSize().x) {
-				pos = wordBegining;
-				string[pos] = '\n';
-				firstWord = true;
-				currentOffset = 0;
-			}
-		}
-    }
-
-	m_geometryText.setString(string);
-	sf::FloatRect textBounds = m_geometryText.getLocalBounds();
-	setMinimumSize(textBounds.width, textBounds.height);
-	update();
-}
-
-void Label::setFont(sf::Font* font)
+void Label::set_font(sf::Font* font)
 {
 	m_font = font;
-	m_geometryText.setFont(*font);
+	m_text_geometry.setFont(*font);
 	update();
 }
 
-void Label::setAlignment(int alignment)
+void Label::set_alignment(int alignment)
 {
 	if (!(alignment & GUI::AlignLeft ||
 		alignment & GUI::AlignRight ||
@@ -124,60 +70,65 @@ void Label::setAlignment(int alignment)
 	update();
 }
 
-void Label::setWordwrapEnabled(bool enabled)
+void Label::set_wordwrap_enabled(bool enabled)
 {
 	m_wordwrap = enabled;
-	setText(m_geometryText.getString().toWideString());
+	set_text(m_text_geometry.getString().toWideString());
 	update();
 }
 
-void Label::setPadding(float padding)
+void Label::set_padding(float padding)
 {
 	m_padding = padding;
 	update();
 }
 
-void Label::setColor(const sf::Color & color)
+void Label::set_color(const sf::Color & color)
 {
-	m_geometryText.setFillColor(color);
+	m_text_geometry.setFillColor(color);
 }
 
-void Label::setOutlineColor(const sf::Color & color)
+void Label::set_text_outline_color(const sf::Color & color)
 {
-	m_geometryText.setOutlineColor(color);
+	m_text_geometry.setOutlineColor(color);
 }
 
-void Label::setOutlineThickness(float thickness)
+void Label::set_text_outline_thickness(float thickness)
 {
-	m_geometryText.setOutlineThickness(thickness);
+	m_text_geometry.setOutlineThickness(thickness);
 }
 
-void Label::setFontSize(int size)
+void Label::set_font_size(int size)
 {
-	m_geometryText.setCharacterSize(size);
-	sf::FloatRect textBounds = m_geometryText.getLocalBounds();
-	setMinimumSize(textBounds.width, textBounds.height);
+	m_text_geometry.setCharacterSize(size);
+	sf::FloatRect textBounds = m_text_geometry.getLocalBounds();
+	set_minimum_size(textBounds.width, textBounds.height);
 	update();
 }
 
-void Label::setFontStyle(unsigned int style)
+void Label::set_font_style(unsigned int style)
 {
-	m_geometryText.setStyle(style);
+	m_text_geometry.setStyle(style);
 }
 
-void Label::onDraw()
+char Label::get_type() const
 {
-	if (m_isVisible) {
-		Core::getWindow()->draw(m_geometry);
-		Core::getWindow()->draw(m_geometryText);
+	return GUI::WidgetType::LabelWidget;
+}
+
+void Label::on_draw()
+{
+	if (m_is_visible) {
+		Core::get_window()->draw(m_geometry);
+		Core::get_window()->draw(m_text_geometry);
 	}
 }
 
 void Label::update()
 {
-	sf::FloatRect textBounds = m_geometryText.getLocalBounds();
+	sf::FloatRect textBounds = m_text_geometry.getLocalBounds();
 	sf::FloatRect bounds = m_geometry.getGlobalBounds();
-	sf::Vector2f position = sf::Vector2f(-textBounds.left, m_geometryText.getCharacterSize() * -0.1875f);
+	sf::Vector2f position = sf::Vector2f(-textBounds.left, m_text_geometry.getCharacterSize() * -0.1875f);
 
 	if (m_alignment & GUI::AlignLeft) {
 		position.x += bounds.left + m_padding;
@@ -199,5 +150,39 @@ void Label::update()
 		position.y += bounds.top + (bounds.height - textBounds.height) / 2.0f;
 	}
 
-	m_geometryText.setPosition(position);
+	position.x = ceilf(position.x);
+	position.y = ceilf(position.y);
+	m_text_geometry.setPosition(position);
+}
+
+sf::String Label::make_wordwrapped_text(sf::String text)
+{
+	unsigned currentOffset = 0;
+	bool firstWord = true;
+	std::size_t wordBegining = 0;
+
+	for (std::size_t pos = 0; pos < text.getSize(); ++pos) {
+		auto currentChar = text[pos];
+		if (currentChar == '\n') {
+			currentOffset = 0;
+			firstWord = true;
+			continue;
+		}
+		else if (currentChar == ' ') {
+			wordBegining = pos;
+			firstWord = false;
+		}
+
+		sf::Glyph glyph = m_font->getGlyph(currentChar, m_text_geometry.getCharacterSize(), m_text_geometry.getStyle() & sf::Text::Bold);
+		currentOffset += glyph.advance;
+
+		if (!firstWord && currentOffset > m_geometry.getSize().x - m_padding) {
+			pos = wordBegining;
+			text[pos] = '\n';
+			firstWord = true;
+			currentOffset = 0;
+		}
+	}
+
+	return text;
 }

@@ -5,6 +5,7 @@
 
 #include "AssetManager.h"
 #include "SoundManager.h"
+#include "Cursor.h"
 #include "State.h"
 #include "Input.h"
 #include "GUI.h"
@@ -32,15 +33,15 @@ public:
 	static void draw(const sf::Drawable& drawable, sf::Shader* shader);
 
 	// Рисует вершины
-	static void draw(const sf::Vertex* vertices, std::size_t vertexCount,
+	static void draw(const sf::Vertex* vertices, std::size_t vertex_count,
 		sf::PrimitiveType type, const sf::RenderStates& states = sf::RenderStates::Default);
 
 	// Возвращает объект окна игры
-	static sf::RenderWindow* getWindow() { return &m_window; }
+	static sf::RenderWindow* get_window() { return &m_window; }
 
 	// Добавляет новое состояние
 	template<class T, class... Args>
-	static void addState(Args&&... args)
+	static void add_state(Args&&... args)
 	{
 		static_assert(std::is_base_of<State, T>::value, "Core::AddState<T>() - T must be child of State");
 
@@ -54,14 +55,14 @@ public:
 
 	// Подменяет текущее состояние другим
 	template<class T, class... Args>
-	static void changeState(Args&&... args)
+	static void change_state(Args&&... args)
 	{
-		deleteState();
-		addState<T>(std::forward(args)...);
+		delete_state();
+		add_state<T>(std::forward(args)...);
 	}
 
 	// Удаляет текущее состояние
-	static void deleteState()
+	static void delete_state()
 	{
 		if (!m_states.empty()) {
 			m_states.top()->close();
@@ -74,7 +75,7 @@ public:
 	}
 
 	// Возвращает текущее состояние
-	static State* getState()
+	static State* get_state()
 	{
 		if (!m_states.empty()) {
 			return m_states.top().get();
@@ -84,9 +85,9 @@ public:
 		}
 	}
 private:
-	static void HandleInput(const float dt);
+	static void handle_input(const float dt);
 
-	static bool m_isRunning;
+	static bool m_is_running;
 	static sf::RenderWindow m_window;
 	static std::stack<std::unique_ptr<State>> m_states;
 };

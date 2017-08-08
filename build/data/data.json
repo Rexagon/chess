@@ -1,0 +1,8 @@
+{
+	"fonts": {
+		"font_default": "default.ttf"
+	},
+	"textures": {
+		"menu_background": "background.jpg"
+	}
+}

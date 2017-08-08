@@ -11,6 +11,7 @@
 
 #include "Widget.h"
 #include "Label.h"
+#include "TextBox.h"
 
 class GUI
 {
@@ -28,18 +29,28 @@ public:
 		AlignCenter = AlignHCenter | AlignVCenter
 	};
 
+	enum WidgetType
+	{
+		EmptyWidget,
+		LabelWidget,
+		TextBoxWidget
+	};
+
 	GUI();
 
 	// Обновляет состояния элементов, нажатия, наведения
-	void update();
+	void update(const float dt);
 
 	// Рисует элементы в заданном порядке
 	void draw();
 
-	// Возвращает корневой виджет всего окна
-	widget_ptr getRootWidget() const { return m_rootWidget; }
+	// Обрабатывает ввод текста
+	void text_entered(sf::Uint32 text);
 
-    void prepareDeleting(Widget* widget);
+	// Возвращает корневой виджет всего окна
+	widget_ptr get_root_widget() const { return m_root_widget; }
+
+    void prepare_deleting(Widget* widget);
 
 	// Вспомогательная функция для создания GUI объектов
 	template<class T, class... Args>
@@ -50,9 +61,9 @@ public:
 		return std::move(widget);
 	}
 private:
-	widget_ptr m_rootWidget;
+	widget_ptr m_root_widget;
 
-	Widget* m_currentHoveredItem;
-	Widget* m_currentPressedItem;
-	Widget* m_currentFocusedItem;
+	Widget* m_current_hovered_item;
+	Widget* m_current_pressed_item;
+	Widget* m_current_focused_item;
 };

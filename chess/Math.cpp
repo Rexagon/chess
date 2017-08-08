@@ -13,12 +13,12 @@ float math::clamp(float value, float min, float max)
 	}
 }
 
-float math::toRadians(float degrees)
+float math::to_radians(float degrees)
 {
 	return degrees * PI / 180.0f;
 }
 
-float math::toDegrees(float radians)
+float math::to_degrees(float radians)
 {
 	return radians * 180.0f / PI;
 }
@@ -69,7 +69,7 @@ vec2 math::rotate(const vec2 & v, float angle)
 	return result;
 }
 
-float math::scalarProjection(const vec2 & a, const vec2 & b)
+float math::scalar_projection(const vec2 & a, const vec2 & b)
 {
 	float length = math::length(a);
 	if (length == 0.0f) {
@@ -80,7 +80,7 @@ float math::scalarProjection(const vec2 & a, const vec2 & b)
 	}
 }
 
-vec2 math::vectorProjection(const vec2 & a, const vec2 & b)
+vec2 math::vector_projection(const vec2 & a, const vec2 & b)
 {
 	float length = math::length(a);
 	if (length == 0.0f) {

@@ -16,37 +16,37 @@ public:
 	virtual ~Layout();
 
 	// Добавляет виджет и обновляет лэйаут
-	virtual void addWidget(widget_ptr widget);
+	virtual void add_widget(widget_ptr widget);
 
 	// Удаляет виджет и обновляет лэйаут
-	virtual void removeWidget(widget_ptr widget);
+	virtual void remove_widget(widget_ptr widget);
 
 	// Возвращает номер виджета внутри лэйаута
 	//@ если виджет не найдён, вернёт -1
-	virtual int indexOf(widget_ptr widget) const;
+	virtual int index_of(widget_ptr widget) const;
 
 	// Возвращает виджет под указанным номером
 	//@ если такой не найдёт, вернёт nullptr
-	virtual Widget* takeAt(int index) const;
+	virtual Widget* take_at(int index) const;
 
     void clear();
 
 	// Устанавливает выравнивание для всех элементов лэйаута и обновляет лэйаут
 	//@ если не указанно выравнивание по какой-нибудь из осей
 	//@ то для этой оси по умолчанию будет выравнивание по центру
-	void setAlignment(int alignment);
+	void set_alignment(int alignment);
 
 	// Устанавливает выравнивание для указанного элемента и обновляет лэйаут
 	//@ если такого элемента нет, то ничего не произойдёт
 	//@ если не указанно выравнивание по какой-нибудь из осей
 	//@ то для этой оси по умолчанию будет выравнивание по центру
-	void setAlignment(widget_ptr widget, int alignment);
+	void set_alignment(widget_ptr widget, int alignment);
 
 	// Устанавливает отступы между элементами и отступы от краёв лэйаута
-	void setSpacing(float spacing) { m_spacing = spacing; }
+	void set_spacing(float spacing) { m_spacing = spacing; }
 
 	// Возвращает размер отступа между элементами и от краёв лэйаута
-	float getSpacing() const { return m_spacing; }
+	float get_spacing() const { return m_spacing; }
 protected:
 	friend class GUI;
 	friend class Widget;
@@ -66,5 +66,5 @@ protected:
 		int alignment;
 	};
 	std::vector<Item> m_items;
-	std::vector<widget_ptr> m_orderedWidgets;
+	std::vector<widget_ptr> m_ordered_widgets;
 };

@@ -50,6 +50,18 @@
     <ClCompile Include="Label.cpp">
       <Filter>GUI\Widgets</Filter>
     </ClCompile>
+    <ClCompile Include="CommandPacket.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="MainMenu.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="TextBox.cpp">
+      <Filter>GUI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="Cursor.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core.h">
@@ -106,6 +118,18 @@
     <ClInclude Include="Label.h">
       <Filter>GUI\Widgets</Filter>
     </ClInclude>
+    <ClInclude Include="MainMenu.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandPacket.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="TextBox.h">
+      <Filter>GUI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="Cursor.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="GUI">
@@ -125,6 +149,9 @@
     </Filter>
     <Filter Include="GUI\Widgets">
       <UniqueIdentifier>{000fb416-1ec8-4aae-9eac-2954b5fca95b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Network">
+      <UniqueIdentifier>{f54a50c0-82ad-4198-b308-76c449a795a5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

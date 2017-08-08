@@ -5,69 +5,69 @@
 const int Input::NUM_KEYS = sf::Keyboard::KeyCount;
 const int Input::NUM_MOUSEBUTTONS = sf::Mouse::ButtonCount;
 
-vec2 Input::m_mousePosition = vec2(0, 0);
-int Input::m_mouseWheelDelta = 0;
+vec2 Input::m_mouse_position = vec2(0, 0);
+int Input::m_mouse_wheel_delta = 0;
 
-std::vector<bool> Input::m_currentKeysState = std::vector<bool>(NUM_KEYS, false);
-std::vector<bool> Input::m_lastKeysState = std::vector<bool>(NUM_KEYS, false);
+std::vector<bool> Input::m_current_keys_state = std::vector<bool>(NUM_KEYS, false);
+std::vector<bool> Input::m_last_keys_state = std::vector<bool>(NUM_KEYS, false);
 
-std::vector<bool> Input::m_currentMouseButtonsState = std::vector<bool>(NUM_MOUSEBUTTONS, false);
-std::vector<bool> Input::m_lastMouseButtonsState = std::vector<bool>(NUM_MOUSEBUTTONS, false);
+std::vector<bool> Input::m_current_mouse_buttons_state = std::vector<bool>(NUM_MOUSEBUTTONS, false);
+std::vector<bool> Input::m_last_mouse_buttons_state = std::vector<bool>(NUM_MOUSEBUTTONS, false);
 
 
 void Input::update()
 {
-	m_lastKeysState = m_currentKeysState;
-	m_lastMouseButtonsState = m_currentMouseButtonsState;
-	m_mouseWheelDelta = 0;
+	m_last_keys_state = m_current_keys_state;
+	m_last_mouse_buttons_state = m_current_mouse_buttons_state;
+	m_mouse_wheel_delta = 0;
 }
 
-bool Input::getKey(Key keyCode)
+bool Input::get_key(Key keyCode)
 {
 	if (keyCode < 0) return false;
-	return m_currentKeysState[keyCode];
+	return m_current_keys_state[keyCode];
 }
 
-bool Input::getKeyDown(Key keyCode)
+bool Input::get_key_down(Key keyCode)
 {
 	if (keyCode < 0) return false;
-	return m_currentKeysState[keyCode] &&
-		!m_lastKeysState[keyCode];
+	return m_current_keys_state[keyCode] &&
+		!m_last_keys_state[keyCode];
 }
 
-bool Input::getKeyUp(Key keyCode)
+bool Input::get_key_up(Key keyCode)
 {
 	if (keyCode < 0) return false;
-	return !m_currentKeysState[keyCode] &&
-		m_lastKeysState[keyCode];
+	return !m_current_keys_state[keyCode] &&
+		m_last_keys_state[keyCode];
 }
 
-bool Input::getMouse(MouseButton button)
+bool Input::get_mouse(MouseButton button)
 {
 	if (button < 0) return false;
-	return m_currentMouseButtonsState[button];
+	return m_current_mouse_buttons_state[button];
 }
 
-bool Input::getMouseDown(MouseButton button)
+bool Input::get_mouse_down(MouseButton button)
 {
 	if (button < 0) return false;
-	return m_currentMouseButtonsState[button] &&
-		!m_lastMouseButtonsState[button];
+	return m_current_mouse_buttons_state[button] &&
+		!m_last_mouse_buttons_state[button];
 }
 
-bool Input::getMouseUp(MouseButton button)
+bool Input::get_mouse_up(MouseButton button)
 {
 	if (button < 0) return false;
-	return !m_currentMouseButtonsState[button] &&
-		m_lastMouseButtonsState[button];
+	return !m_current_mouse_buttons_state[button] &&
+		m_last_mouse_buttons_state[button];
 }
 
-vec2 Input::getMousePosition()
+vec2 Input::get_mouse_position()
 {
-	return m_mousePosition;
+	return m_mouse_position;
 }
 
-int Input::getMouseWheelDelta()
+int Input::get_mouse_wheel_delta()
 {
-	return m_mouseWheelDelta;
+	return m_mouse_wheel_delta;
 }

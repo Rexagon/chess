@@ -6,7 +6,7 @@ class Asset
 {
 public:
 	virtual ~Asset() {}
-	virtual void* getData() = 0;
+	virtual void* get_data() = 0;
 };
 
 class AssetFactory

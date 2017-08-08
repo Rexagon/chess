@@ -7,20 +7,19 @@ class SoundManager
 public:
 	static void update(const float dt);
 
-	static void setMusic(const std::string& name);
-	static sf::Music* getMusic();
+	static void set_music(const std::string& name);
+	static sf::Music* get_music();
 
-	static void setMusicVolume(float volume);
-	static float getMusicVolume();
+	static void set_music_volume(float volume);
+	static float get_music_volume();
 
-	static void stopMusic();
-	static void pauseMusic();
-	static void playMusic();
+	static void stop_music();
+	static void pause_music();
+	static void play_music();
 
-	static sf::Music::Status getMusicStatus();
+	static sf::Music::Status get_music_status();
 
 private:
-	static sf::Music* m_currentMusic;
-	static bool m_isStopping;
-	static float m_musicVolume;
+	static sf::Music* m_current_music;
+	static float m_music_volume;
 };

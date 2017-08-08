@@ -2,75 +2,74 @@
 
 #include "AssetManager.h"
 
-sf::Music* SoundManager::m_currentMusic = nullptr;
-bool SoundManager::m_isStopping = false;
-float SoundManager::m_musicVolume = 10.0f;
+sf::Music* SoundManager::m_current_music = nullptr;
+float SoundManager::m_music_volume = 10.0f;
 
 void SoundManager::update(const float dt)
 {
 }
 
-void SoundManager::setMusic(const std::string & name)
+void SoundManager::set_music(const std::string & name)
 {
 	sf::Music* music = AssetManager::get<sf::Music>(name);
 	if (music != nullptr) {
 		sf::Music::Status status = sf::Music::Stopped;
-		if (m_currentMusic != nullptr) {
-			status = getMusicStatus();
-			stopMusic();
+		if (m_current_music != nullptr) {
+			status = get_music_status();
+			stop_music();
 		}
 
-		m_currentMusic = music;
-		m_currentMusic->setVolume(m_musicVolume);
+		m_current_music = music;
+		m_current_music->setVolume(m_music_volume);
 		if (status == sf::Music::Playing) {
-			playMusic();
+			play_music();
 		}
 	}
 }
 
-sf::Music * SoundManager::getMusic()
+sf::Music * SoundManager::get_music()
 {
-	return m_currentMusic;
+	return m_current_music;
 }
 
-void SoundManager::setMusicVolume(float volume)
+void SoundManager::set_music_volume(float volume)
 {
-	m_musicVolume = volume;
-	if (m_currentMusic != nullptr) {
-		m_currentMusic->setVolume(m_musicVolume);
+	m_music_volume = volume;
+	if (m_current_music != nullptr) {
+		m_current_music->setVolume(m_music_volume);
 	}
 }
 
-float SoundManager::getMusicVolume()
+float SoundManager::get_music_volume()
 {
-	return m_musicVolume;
+	return m_music_volume;
 }
 
-void SoundManager::stopMusic()
+void SoundManager::stop_music()
 {
-	if (m_currentMusic != nullptr) {
-		m_currentMusic->stop();
+	if (m_current_music != nullptr) {
+		m_current_music->stop();
 	}
 }
 
-void SoundManager::pauseMusic()
+void SoundManager::pause_music()
 {
-	if (m_currentMusic != nullptr) {
-		m_currentMusic->pause();
+	if (m_current_music != nullptr) {
+		m_current_music->pause();
 	}
 }
 
-void SoundManager::playMusic()
+void SoundManager::play_music()
 {
-	if (m_currentMusic != nullptr) {
-		m_currentMusic->play();
+	if (m_current_music != nullptr) {
+		m_current_music->play();
 	}
 }
 
-sf::Music::Status SoundManager::getMusicStatus()
+sf::Music::Status SoundManager::get_music_status()
 {
-	if (m_currentMusic != nullptr) {
-		return m_currentMusic->getStatus();
+	if (m_current_music != nullptr) {
+		return m_current_music->getStatus();
 	}
 	else {
 		return sf::Music::Status::Stopped;
