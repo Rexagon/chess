@@ -4,21 +4,27 @@
 
 #include <SFML/Network.hpp>
 
-enum Command {
-	Login,
-	Logout,
-	EnterRoom,
-	LeaveRoom,
-	SendMessage,
-	UserConnected,
-	UserDisconnected
-};
-
 class CommandPacket
 {
 public:
+	enum Type {
+		Signin,
+		Signup,
+		Signout,
+		Accept,
+		Reject,
+		RoomsList,
+		EnterRoom,
+		LeaveRoom,
+		SendMessage,
+
+		TypesCount
+	};
+
 	CommandPacket(sf::Packet packet);
-	CommandPacket(signed char command, const std::vector<std::string>& arguments);
+	CommandPacket(signed char command, const std::vector<std::wstring>& arguments);
+
+	CommandPacket& operator =(const CommandPacket& packet);
 
 	sf::Packet to_sfml_packet() const;
 
@@ -27,11 +33,11 @@ public:
 	void set_command(signed char command);
 	signed char get_command() const;
 
-	void set_arguments(const std::vector<std::string>& arguments);
-	std::vector<std::string> get_arguments() const;
+	void set_arguments(const std::vector<std::wstring>& arguments);
+	std::vector<std::wstring> get_arguments() const;
 	unsigned int get_arguments_count() const;
 private:
 	bool m_is_valid;
 	signed char m_command;
-	std::vector<std::string> m_arguments;
+	std::vector<std::wstring> m_arguments;
 };

@@ -72,7 +72,7 @@ void TextBox::set_masking_character(sf::Uint32 character)
 
 void TextBox::handle_text_enter(sf::Uint32 text)
 {
-	sf::String current_text = m_text_geometry.getString();
+	sf::String current_text = m_current_text;
 	int new_caret_position = m_caret_position;
 
 	if (text == 8) { // backspace

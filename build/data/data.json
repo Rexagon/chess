@@ -3,7 +3,9 @@
 		"font_default": "default.ttf"
 	},
 	"textures": {
-		"menu_background": "background.jpg",
-		"menu_logo": "logo.png"
+		"menu_background": "menu_background.png",
+		"menu_logo": "logo.png",
+
+		"rooms_background": "rooms_background.jpg"
 	}
 }

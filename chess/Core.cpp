@@ -10,6 +10,7 @@ void Core::init()
 	Log::create("log.txt");
 
 	AssetManager::load("data/data.json");
+	ConfigManager::init();
 
 	Client::init("95.84.247.9", 49876);
 
@@ -29,6 +30,7 @@ void Core::close()
 	m_window.close();
 
 	AssetManager::clear();
+	ConfigManager::close();
 }
 
 void Core::run()

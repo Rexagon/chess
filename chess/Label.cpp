@@ -176,7 +176,7 @@ sf::String Label::make_wordwrapped_text(sf::String text)
 		sf::Glyph glyph = m_font->getGlyph(currentChar, m_text_geometry.getCharacterSize(), m_text_geometry.getStyle() & sf::Text::Bold);
 		currentOffset += glyph.advance;
 
-		if (!firstWord && currentOffset > m_geometry.getSize().x - m_padding) {
+		if (!firstWord && currentOffset > m_geometry.getSize().x - m_padding * 2) {
 			pos = wordBegining;
 			text[pos] = '\n';
 			firstWord = true;

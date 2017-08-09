@@ -14,7 +14,7 @@ std::mutex Client::m_socket_selector_mutex;
 sf::SocketSelector Client::m_socket_selector;
 
 std::mutex Client::m_command_handlers_mutex;
-std::map<signed char, std::function<void(const CommandPacket&)>> Client::m_command_handlers;
+std::map<signed char, std::pair<std::function<void(const CommandPacket&)>, bool>> Client::m_command_handlers;
 
 
 void Client::init(const std::string& ip, unsigned short port)
@@ -57,10 +57,10 @@ void Client::send_command(const CommandPacket & packet, std::function<void(sf::S
 	}, packet.to_sfml_packet(), callback).detach();
 }
 
-void Client::add_command_handler(signed char command, std::function<void(const CommandPacket&)> handler)
+void Client::add_command_handler(signed char command, std::function<void(const CommandPacket&)> handler, bool temp)
 {
 	std::unique_lock<std::mutex> lock(m_command_handlers_mutex);
-	m_command_handlers[command] = handler;
+	m_command_handlers[command] = std::make_pair(handler, temp);
 }
 
 void Client::remove_command_handler(signed char command)
@@ -105,7 +105,10 @@ void Client::solve_command_packet(CommandPacket packet)
 		std::unique_lock<std::mutex> lock(m_command_handlers_mutex);
 		auto it = m_command_handlers.find(packet.get_command());
 		if (it != m_command_handlers.end()) {
-			it->second(packet);
+			it->second.first(packet);
+			if (it->second.second == true) {
+				m_command_handlers.erase(it);
+			}
 		}
 		break;
 	}

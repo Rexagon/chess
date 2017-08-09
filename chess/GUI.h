@@ -37,6 +37,7 @@ public:
 	};
 
 	GUI();
+	~GUI();
 
 	// Обновляет состояния элементов, нажатия, наведения
 	void update(const float dt);
@@ -50,7 +51,7 @@ public:
 	// Возвращает корневой виджет всего окна
 	widget_ptr get_root_widget() const { return m_root_widget; }
 
-    void prepare_deleting(Widget* widget);
+    void prepare_deleting(widget_ptr widget);
 
 	// Вспомогательная функция для создания GUI объектов
 	template<class T, class... Args>
@@ -63,7 +64,7 @@ public:
 private:
 	widget_ptr m_root_widget;
 
-	Widget* m_current_hovered_item;
-	Widget* m_current_pressed_item;
-	Widget* m_current_focused_item;
+	widget_ptr m_current_hovered_item;
+	widget_ptr m_current_pressed_item;
+	widget_ptr m_current_focused_item;
 };

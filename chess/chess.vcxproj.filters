@@ -65,6 +65,15 @@
     <ClCompile Include="Client.cpp">
       <Filter>Network</Filter>
     </ClCompile>
+    <ClCompile Include="SHA256.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="RoomsList.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core.h">
@@ -135,6 +144,15 @@
     </ClInclude>
     <ClInclude Include="Client.h">
       <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="SHA256.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="RoomsList.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigManager.h">
+      <Filter>Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

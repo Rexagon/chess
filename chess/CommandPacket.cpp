@@ -4,15 +4,26 @@ CommandPacket::CommandPacket(sf::Packet packet)
 {
 	m_is_valid = packet >> m_command;
 
-	std::string argument;
+	std::wstring argument;
 	while (packet >> argument) {
 		m_arguments.push_back(argument);
 	}
+
+	m_is_valid &= packet.endOfPacket();
 }
 
-CommandPacket::CommandPacket(signed char command, const std::vector<std::string>& arguments) :
+CommandPacket::CommandPacket(signed char command, const std::vector<std::wstring>& arguments) :
 	m_command(command), m_arguments(arguments)
 {
+}
+
+CommandPacket & CommandPacket::operator =(const CommandPacket & packet)
+{
+	m_is_valid = packet.m_is_valid;
+	m_command = packet.m_command;
+	m_arguments = packet.m_arguments;
+
+	return *this;
 }
 
 sf::Packet CommandPacket::to_sfml_packet() const
@@ -40,12 +51,12 @@ signed char CommandPacket::get_command() const
 	return m_command;
 }
 
-void CommandPacket::set_arguments(const std::vector<std::string>& arguments)
+void CommandPacket::set_arguments(const std::vector<std::wstring>& arguments)
 {
 	m_arguments = arguments;
 }
 
-std::vector<std::string> CommandPacket::get_arguments() const
+std::vector<std::wstring> CommandPacket::get_arguments() const
 {
 	return m_arguments;
 }

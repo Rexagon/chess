@@ -15,11 +15,20 @@ GUI::GUI() :
 	m_root_widget->set_layout(new Layout);
 }
 
+GUI::~GUI()
+{
+	m_current_focused_item.reset();
+	m_current_hovered_item.reset();
+	m_current_pressed_item.reset();
+
+	m_root_widget.reset();
+}
+
 void GUI::update(const float dt)
 {
 	vec2 mouse_position = Input::get_mouse_position();
 
-	Widget* hovered_item = nullptr;
+	widget_ptr hovered_item = nullptr;
 	int hovered_item_index = -1;
 
 	std::stack<Widget*> widgets;
@@ -41,7 +50,7 @@ void GUI::update(const float dt)
 				if (children[i]->get_rect().contains(mouse_position.x, mouse_position.y) &&
 					children[i]->is_visible()) {
 					itemIndex = i;
-					hovered_item = children[i].get();
+					hovered_item = children[i];
 				}
 			}
 
@@ -130,20 +139,20 @@ void GUI::text_entered(sf::Uint32 text)
 	if (m_current_focused_item != nullptr && 
 		m_current_focused_item->get_type() == WidgetType::TextBoxWidget) 
 	{
-		TextBox* label = reinterpret_cast<TextBox*>(m_current_focused_item);
+		TextBox* label = reinterpret_cast<TextBox*>(m_current_focused_item.get());
 		label->handle_text_enter(text);
 	}
 }
 
-void GUI::prepare_deleting(Widget *widget)
+void GUI::prepare_deleting(widget_ptr widget)
 {
     if (widget == m_current_focused_item) {
-        m_current_focused_item = nullptr;
+        m_current_focused_item.reset();
     }
     if (widget == m_current_hovered_item) {
-        m_current_hovered_item = nullptr;
+        m_current_hovered_item.reset();
     }
     if (widget == m_current_pressed_item) {
-        m_current_pressed_item = nullptr;
+        m_current_pressed_item.reset();
     }
 }

@@ -90,6 +90,7 @@
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="CommandPacket.cpp" />
+    <ClCompile Include="ConfigManager.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="Cursor.cpp" />
     <ClCompile Include="FontAsset.cpp" />
@@ -103,6 +104,8 @@
     <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="MusicAsset.cpp" />
+    <ClCompile Include="RoomsList.cpp" />
+    <ClCompile Include="SHA256.cpp" />
     <ClCompile Include="ShaderAsset.cpp" />
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="TextBox.cpp" />
@@ -115,6 +118,7 @@
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="CommandPacket.h" />
+    <ClInclude Include="ConfigManager.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="Cursor.h" />
     <ClInclude Include="FontAsset.h" />
@@ -127,6 +131,8 @@
     <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="MusicAsset.h" />
+    <ClInclude Include="RoomsList.h" />
+    <ClInclude Include="SHA256.h" />
     <ClInclude Include="ShaderAsset.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="State.h" />

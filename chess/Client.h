@@ -21,7 +21,7 @@ public:
 
 	static void send_command(const CommandPacket& packet, std::function<void(sf::Socket::Status)> callback = [](sf::Socket::Status) {});
 
-	static void add_command_handler(signed char command, std::function<void(const CommandPacket&)> handler);
+	static void add_command_handler(signed char command, std::function<void(const CommandPacket&)> handler, bool temp = true);
 	static void remove_command_handler(signed char command);
 private:
 	static void packets_handler();
@@ -39,5 +39,5 @@ private:
 	static sf::SocketSelector m_socket_selector;
 
 	static std::mutex m_command_handlers_mutex;
-	static std::map<signed char, std::function<void(const CommandPacket&)>> m_command_handlers;
+	static std::map<signed char, std::pair<std::function<void(const CommandPacket&)>, bool>> m_command_handlers;
 };
