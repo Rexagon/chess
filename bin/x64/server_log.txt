@@ -3,5 +3,34 @@
 *   by Mechanic.     *
 **********************
 
-[INFO] [09.08.2017 11:55:33]: A database has opened
-[INFO] [09.08.2017 11:55:33]: Start PacketHandler
+[INFO] [09.08.2017 21:07:55]: A database has opened
+[INFO] [09.08.2017 21:07:55]: Start PacketHandler
+[INFO] [09.08.2017 21:08:01]: User was connected to server (ip=95.84.247.9)
+[INFO] [09.08.2017 21:09:00]: Packet was received (status=0, size=129)
+[INFO] [09.08.2017 21:09:00]: Packet was sent to server (status=0)
+[INFO] [09.08.2017 21:09:00]: User was tried sign in (ip=95.84.247.9, login=1qw					dsadas		, password=asdasdASD					).
+[INFO] [09.08.2017 21:09:53]: Packet was received (status=0, size=89)
+[INFO] [09.08.2017 21:09:53]: Packet was sent to server (status=0)
+[INFO] [09.08.2017 21:09:54]: User was signed up (ip=95.84.247.9, login=	DSAD	, password=1234, hash_pass=4f37c061f1854f9682f543fecb5ee9d652c803235970202de97c6e40c8361766).
+[INFO] [09.08.2017 21:10:25]: Packet was received (status=0, size=89)
+[INFO] [09.08.2017 21:10:25]: Packet was sent to server (status=0)
+[INFO] [09.08.2017 21:10:25]: User was signed in (ip=95.84.247.9, login=	DSAD	, password=1234, hash_pass=4f37c061f1854f9682f543fecb5ee9d652c803235970202de97c6e40c8361766).
+[INFO] [09.08.2017 21:10:29]: Packet was received (status=3, size=0)
+[DEBUG] [09.08.2017 21:10:29]: Removing user from his room...
+[DEBUG] [09.08.2017 21:10:29]: Remove socket from socket selector...
+[DEBUG] [09.08.2017 21:10:29]: Disconnect socket...
+[DEBUG] [09.08.2017 21:10:29]: Remove user from user list...
+[INFO] [09.08.2017 21:10:29]: User was disconnected from server (ip=0.0.0.0)
+[INFO] [09.08.2017 21:10:39]: User was connected to server (ip=95.84.247.9)
+[INFO] [09.08.2017 21:10:44]: Packet was received (status=0, size=89)
+[INFO] [09.08.2017 21:10:44]: Packet was sent to server (status=0)
+[INFO] [09.08.2017 21:10:44]: User was signed in (ip=95.84.247.9, login=	DSAD	, password=1234, hash_pass=4f37c061f1854f9682f543fecb5ee9d652c803235970202de97c6e40c8361766).
+[INFO] [09.08.2017 21:11:17]: Packet was received (status=0, size=89)
+[INFO] [09.08.2017 21:11:17]: Packet was sent to server (status=0)
+[INFO] [09.08.2017 21:11:17]: User was tried sign in (ip=95.84.247.9, login=	DSAD	, password=1234).
+[INFO] [09.08.2017 21:11:18]: Packet was received (status=3, size=0)
+[DEBUG] [09.08.2017 21:11:18]: Removing user from his room...
+[DEBUG] [09.08.2017 21:11:18]: Remove socket from socket selector...
+[DEBUG] [09.08.2017 21:11:18]: Disconnect socket...
+[DEBUG] [09.08.2017 21:11:18]: Remove user from user list...
+[INFO] [09.08.2017 21:11:18]: User was disconnected from server (ip=0.0.0.0)

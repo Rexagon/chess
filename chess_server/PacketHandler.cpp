@@ -8,27 +8,123 @@ PacketHandler::PacketHandler(Server * server) : m_server(server)
 {
 	m_events = {
 		{
-			CommandPacket::Login,
+			CommandPacket::SendMessage,
 			[this](User* user, CommandPacket packet) {
-				for (std::list<std::unique_ptr<User>>::iterator it_users = m_server->m_users.begin(); it_users != m_server->m_users.end(); it_users++) {
-					if ((*it_users)->get_login() == user->get_login()) {
-						send(user, CommandPacket(CommandPacket::Reject, std::vector<std::wstring>()));
+				Truelog::sync_print([&]() {
+					Truelog::stream() << Truelog::Type::Info << "User has sent the message (ip=" << user->get_socket()->getRemoteAddress().toString() << ", login=" << user->get_login() << ", message=" << packet.get_arguments()[0] << ").";
+				});
+				for (std::list<User*>::iterator it_user = user->get_room()->get_users_list().begin(); it_user != user->get_room()->get_users_list().end(); it_user++) {
+					send((*it_user), CommandPacket(CommandPacket::SendMessage, std::vector<std::wstring>({ packet.get_arguments()[0], user->get_login() })));
+				}
+			}
+		},
+		{
+			CommandPacket::Signin,
+			[this](User* user, CommandPacket packet) {
+				// Check already logged user
+				for (std::list<std::unique_ptr<User>>::iterator it_user = m_server->m_users.begin(); it_user != m_server->m_users.end(); it_user++) {
+					if ((*it_user)->get_login() != L"" && (*it_user)->get_login() == user->get_login()) {
+						send(user, CommandPacket(CommandPacket::Signin, std::vector<std::wstring>({ L"f" })));
+						Truelog::sync_print([&]() {
+							Truelog::stream() << Truelog::Type::Info << "User was tried sign in (ip=" << user->get_socket()->getRemoteAddress().toString() << ", login=" << packet.get_arguments()[0] << ", password=" << packet.get_arguments()[1] << ").";
+						});
 						return;
 					}
 				}
 
 				sqlite3_stmt* statement;
-				sqlite3_prepare16_v2(m_server->m_db, "SELECT * FROM users WHERE (login=?) AND (password=?)", -1, &statement, 0);
+				sqlite3_prepare16_v2(m_server->m_db, L"SELECT * FROM users WHERE (login=?) AND (password=?)", -1, &statement, 0);
 				
+				std::wstring hash_password = sha256(packet.get_arguments()[1]);
+
 				sqlite3_bind_text16(statement, 1, packet.get_arguments()[0].c_str(), -1, 0);
-				sqlite3_bind_text16(statement, 2, packet.get_arguments()[1].c_str(), -1, 0);
+				sqlite3_bind_text16(statement, 2, hash_password.c_str(), -1, 0);
 
 				if (sqlite3_step(statement) == SQLITE_ROW) {
-					send(user, CommandPacket(CommandPacket::Reject, std::vector<std::wstring>()));
+					send(user, CommandPacket(CommandPacket::Signin, std::vector<std::wstring>({ L"t" })));
+					user->set_login(packet.get_arguments()[0]);
+
+					Truelog::sync_print([&]() {
+						std::string tmp = "";
+						for (size_t i = 0; i < hash_password.size() * 2; i++) {
+							tmp += reinterpret_cast<char*>(&hash_password[0])[i];
+						}
+						Truelog::stream() << Truelog::Type::Info << "User was signed in (ip=" << user->get_socket()->getRemoteAddress().toString() << ", login=" << packet.get_arguments()[0] << ", password=" << packet.get_arguments()[1] << ", hash_pass=" << tmp << ").";
+					});
 				}
 				else {
-					send(user, CommandPacket(CommandPacket::Accept, std::vector<std::wstring>()));
+					send(user, CommandPacket(CommandPacket::Signin, std::vector<std::wstring>({ L"f" })));
+
+					Truelog::sync_print([&]() {
+						Truelog::stream() << Truelog::Type::Info << "User was tried sign in (ip=" << user->get_socket()->getRemoteAddress().toString() << ", login=" << packet.get_arguments()[0] << ", password=" << packet.get_arguments()[1] << ").";
+					});					
 				}
+				sqlite3_finalize(statement);
+			}
+		},
+
+		{
+			CommandPacket::Signup,
+			[this](User* user, CommandPacket packet) {
+				// Check login and password length
+				if (packet.get_arguments()[0].size() < 4 || packet.get_arguments()[0].size() > 16 ||
+					packet.get_arguments()[1].size() < 4 || packet.get_arguments()[1].size() > 16)
+				{
+					send(user, CommandPacket(CommandPacket::Signup, std::vector<std::wstring>({ L"f" })));
+
+					Truelog::sync_print([&]() {
+						Truelog::stream() << Truelog::Type::Info << "User was tried sign up (ip=" << user->get_socket()->getRemoteAddress().toString() << ").";
+					});
+
+					return;
+				}
+
+				// Check already signed up user
+				sqlite3_stmt* statement;
+				sqlite3_prepare16_v2(m_server->m_db, L"SELECT * FROM users WHERE (login=?)", -1, &statement, 0);
+
+				sqlite3_bind_text16(statement, 1, packet.get_arguments()[0].c_str(), -1, 0);
+
+				if (sqlite3_step(statement) == SQLITE_ROW) {
+					send(user, CommandPacket(CommandPacket::Signup, std::vector<std::wstring>({ L"f" })));
+
+					Truelog::sync_print([&]() {
+						Truelog::stream() << Truelog::Type::Info << "User was tried sign up (ip=" << user->get_socket()->getRemoteAddress().toString() << ").";
+					});
+				}
+				else {
+					send(user, CommandPacket(CommandPacket::Signup, std::vector<std::wstring>({ L"t" })));
+
+					sqlite3_stmt* insert_statement;
+					sqlite3_prepare16_v2(m_server->m_db, L"INSERT INTO users (login, password) VALUES (?, ?)", -1, &insert_statement, 0);
+					
+					std::wstring hash_password = sha256(packet.get_arguments()[1]);
+
+					sqlite3_bind_text16(insert_statement, 1, packet.get_arguments()[0].c_str(), -1, 0);
+					sqlite3_bind_text16(insert_statement, 2, hash_password.c_str(), -1, 0);
+
+					sqlite3_step(insert_statement);
+
+					sqlite3_finalize(insert_statement);
+
+					Truelog::sync_print([&]() {
+						std::string tmp = "";
+						for (size_t i = 0; i < hash_password.size() * 2; i++) {
+							tmp += reinterpret_cast<char*>(&hash_password[0])[i];
+						}
+						Truelog::stream() << Truelog::Type::Info << "User was signed up (ip=" << user->get_socket()->getRemoteAddress().toString() << ", login=" << packet.get_arguments()[0] << ", password=" << packet.get_arguments()[1] << ", hash_pass=" << tmp << ").";
+					});
+				}
+				sqlite3_finalize(statement);
+			}
+		},
+
+		{
+			CommandPacket::Signout,
+			[this](User* user, CommandPacket packet) {
+				// Erase user from his room. Send empty room for him in other words
+				m_events[CommandPacket::ChangeRoom](user, CommandPacket(CommandPacket::ChangeRoom, std::vector<std::wstring>({ L"" })));
+				user->set_login(L"");
 			}
 		},
 
@@ -62,22 +158,49 @@ PacketHandler::PacketHandler(Server * server) : m_server(server)
 				send(user, CommandPacket(CommandPacket::RoomList, room_list));
 			}
 		},
-
+		
 		{
-			CommandPacket::EnterRoom,
-			[](User* user, CommandPacket packet) {
-				user->set_role(User::Role::Spectator);
-				user->get_room()->get_users_list().push_back(user);
+			CommandPacket::ChangeRoom,
+			[this](User* user, CommandPacket packet) {
+				if (user->get_room() != nullptr) {
+					user->get_room()->erase_user(user);
+				}
+
+				if (packet.get_arguments_count() > 0 && packet.get_arguments()[0].size() > 0) {
+					for (std::list<std::unique_ptr<Room>>::iterator it_room = m_server->m_rooms.begin(); it_room != m_server->m_rooms.end(); it_room++) {
+						if ((*it_room)->get_name() == packet.get_arguments()[0]) {
+							(*it_room)->add_user(user);
+
+							// Send to user room settings
+							m_events[CommandPacket::RoomSettings](user, CommandPacket(CommandPacket::RoomSettings, std::vector<std::wstring>()));
+
+							break;
+						}
+					}
+				}
 			}
 		},
 
 		{
-			CommandPacket::LeaveRoom,
-			[](User* user, CommandPacket packet) {
-				for (std::list<User*>::iterator it = user->get_room()->get_users_list().begin(); it != user->get_room()->get_users_list().end(); it++) {
-					if (user == (*it)) {
-						user->get_room()->get_users_list().erase(it);
-						break;
+			CommandPacket::RoomSettings,
+			[this](User* user, CommandPacket packet) {
+				CommandPacket settings_packet(CommandPacket::RoomSettings, std::vector<std::wstring>(
+					{
+						user->get_room()->get_name(),
+						user->get_room()->get_owner(),
+						user->get_room()->get_white_player(),
+						user->get_room()->get_black_player(),
+						std::to_wstring(static_cast<int>(user->get_room()->is_private())),
+						std::to_wstring(static_cast<int>(user->get_room()->is_chat_enabled()))
+					}
+				));
+
+				if (packet.get_arguments_count() == 0) {
+					send(user, settings_packet);
+				}
+				else {
+					for (std::list<User*>::iterator it_user = user->get_room()->get_users_list().begin(); it_user != user->get_room()->get_users_list().end(); it_user++) {
+						send(*it_user, settings_packet);
 					}
 				}
 			}
@@ -86,8 +209,10 @@ PacketHandler::PacketHandler(Server * server) : m_server(server)
 		{
 			CommandPacket::SendMessage,
 			[](User* user, CommandPacket packet) {
-				for (std::list<User*>::iterator it = user->get_room()->get_users_list().begin(); it != user->get_room()->get_users_list().end(); it++) {
-					(*it)->get_socket()->send(packet.to_sfml_packet());
+				if (user->get_room() != nullptr) {
+					for (std::list<User*>::iterator it = user->get_room()->get_users_list().begin(); it != user->get_room()->get_users_list().end(); it++) {
+						(*it)->get_socket()->send(packet.to_sfml_packet());
+					}
 				}
 			}
 		}
@@ -142,10 +267,10 @@ void PacketHandler::handler()
 				}
 			}
 			else {
-				for (std::list<std::unique_ptr<User>>::iterator it_users = m_server->m_users.begin(); it_users != m_server->m_users.end();) {
-					if (m_server->m_socket_selector.isReady(*(*it_users)->get_socket())) {
+				for (std::list<std::unique_ptr<User>>::iterator it_user = m_server->m_users.begin(); it_user != m_server->m_users.end();) {
+					if (m_server->m_socket_selector.isReady(*(*it_user)->get_socket())) {
 						sf::Packet sf_packet;
-						sf::Socket::Status packet_status = (*it_users)->get_socket()->receive(sf_packet);
+						sf::Socket::Status packet_status = (*it_user)->get_socket()->receive(sf_packet);
 
 						CommandPacket packet(sf_packet);
 
@@ -158,11 +283,11 @@ void PacketHandler::handler()
 								std::map<signed char, std::function<void(User*, CommandPacket)>>::iterator it_event = m_events.find(packet.get_command());
 
 								if (it_event != m_events.end()) {
-									std::thread(it_event->second, it_users->get(), packet).detach();
+									std::thread(it_event->second, it_user->get(), packet).detach();
 								}
 							}
 
-							it_users++;
+							it_user++;
 						}
 						else if (packet_status == sf::Socket::Disconnected) {
 
@@ -170,35 +295,34 @@ void PacketHandler::handler()
 								Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Debug << "Removing user from his room...";
 							});
 
-							if ((*it_users)->get_room() != nullptr) {
-								m_events[CommandPacket::Type::LeaveRoom](it_users->get(), packet);
-							}
+							// Delete user from his room
+							m_events[CommandPacket::ChangeRoom](it_user->get(), CommandPacket(CommandPacket::ChangeRoom, std::vector<std::wstring>({ L"" })));
 
 							Truelog::sync_print([&]() {
 								Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Debug << "Remove socket from socket selector...";
 							});
 
-							m_server->m_socket_selector.remove(*(*it_users)->get_socket());
+							m_server->m_socket_selector.remove(*(*it_user)->get_socket());
 
 							Truelog::sync_print([&]() {
 								Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Debug << "Disconnect socket...";
 							});
 
-							(*it_users)->get_socket()->disconnect();
+							(*it_user)->get_socket()->disconnect();
 
 							Truelog::sync_print([&]() {
 								Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Debug << "Remove user from user list...";
 							});
 
 							Truelog::sync_print([&]() {
-								Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Info << "User was disconnected from server (ip=" << (*it_users)->get_socket()->getRemoteAddress().toString() << ")";
+								Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Info << "User was disconnected from server (ip=" << (*it_user)->get_socket()->getRemoteAddress().toString() << ")";
 							});
 
-							it_users = m_server->m_users.erase(it_users);
+							it_user = m_server->m_users.erase(it_user);
 						}
 					}
 					else {
-						it_users++;
+						it_user++;
 					}
 				}
 			}

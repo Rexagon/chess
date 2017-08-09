@@ -1,0 +1,6 @@
+когда юзер заходит в комнату, сервер ему отправляет CommandPacket::RoomSettings
+
+Если client.get_login() == packet.get_login() => админ панель
+
+При изменении комнаты сервер рассылает всем CommandPacket::RoomSettings, если поменялись игроки,
+то их пересаживает за зрителей

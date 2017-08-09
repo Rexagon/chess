@@ -20,13 +20,13 @@ PRAGMA foreign_keys = OFF;
 CREATE TABLE IF NOT EXISTS "rooms" (
 "name"  TEXT NOT NULL,
 "owner"  TEXT NOT NULL,
-"user_black"  TEXT,
 "user_white"  TEXT,
+"user_black"  TEXT,
 "private"  INTEGER NOT NULL DEFAULT 0,
 "chat_enabled"  INTEGER NOT NULL DEFAULT 1,
 PRIMARY KEY ("name" ASC),
-CONSTRAINT "user_black_room" FOREIGN KEY ("user_black") REFERENCES "users" ("login") ON DELETE SET NULL ON UPDATE CASCADE,
 CONSTRAINT "user_white_room" FOREIGN KEY ("user_white") REFERENCES "users" ("login") ON DELETE SET NULL ON UPDATE CASCADE,
+CONSTRAINT "user_black_room" FOREIGN KEY ("user_black") REFERENCES "users" ("login") ON DELETE SET NULL ON UPDATE CASCADE,
 CONSTRAINT "user_owner_room" FOREIGN KEY ("owner") REFERENCES "users" ("login") ON DELETE CASCADE ON UPDATE CASCADE
 );
 

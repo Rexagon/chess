@@ -8,6 +8,8 @@ Server::Server(unsigned short port) : m_is_run(true), m_port(port), m_packet_han
 
 void Server::run()
 {
+	setlocale(LC_ALL, "");
+
 	// If server not open with the port throw exception
 	if (m_listener.listen(m_port) != sf::Socket::Done) {
 		throw std::exception(std::string("Unable to create server on port " + std::to_string(m_port)).c_str());
@@ -27,6 +29,8 @@ void Server::run()
 	else {
 		throw std::exception("Can\'t open or create a database.");
 	}
+
+	Room::init(m_db, m_rooms);
 
 	Truelog::stream() << Truelog::Type::Info << "A database has opened";
 

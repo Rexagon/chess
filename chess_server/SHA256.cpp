@@ -133,7 +133,7 @@ std::string sha256(std::string input)
 	return std::string(buf);
 }
 
-std::string sha256(std::wstring input)
+std::wstring sha256(std::wstring input)
 {
 	unsigned char digest[SHA256::DIGEST_SIZE];
 	memset(digest, 0, SHA256::DIGEST_SIZE);
@@ -149,5 +149,11 @@ std::string sha256(std::wstring input)
 		sprintf(buf + i * 2, "%02x", digest[i]);
 	}
 
-	return std::string(buf);
+	std::wstring result;
+	result.resize(SHA256::DIGEST_SIZE);
+	for (int i = 0; i < SHA256::DIGEST_SIZE * 2; ++i) {
+		reinterpret_cast<char*>(&result[0])[i] = buf[i];
+	}
+
+	return result;
 }

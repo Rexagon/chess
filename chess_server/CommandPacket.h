@@ -8,14 +8,15 @@ class CommandPacket
 {
 public:
 	enum Type {
-		Login,
-		Logout,
+		Signin,
+		Signup,
+		Signout,
 		Accept,
 		Reject,
 		RoomList,
-		EnterRoom,
-		LeaveRoom,
+		ChangeRoom,
 		SendMessage,
+		RoomSettings,
 
 		TypesCount
 	};

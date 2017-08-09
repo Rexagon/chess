@@ -14,6 +14,7 @@
 #include "CommandPacket.h"
 
 #include "Truelog.h"
+#include "SHA256.h"
 #include "User.h"
 
 class Server;
