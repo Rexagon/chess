@@ -8,6 +8,62 @@ PacketHandler::PacketHandler(Server * server) : m_server(server)
 {
 	m_events = {
 		{
+			CommandPacket::Login,
+			[this](User* user, CommandPacket packet) {
+				for (std::list<std::unique_ptr<User>>::iterator it_users = m_server->m_users.begin(); it_users != m_server->m_users.end(); it_users++) {
+					if ((*it_users)->get_login() == user->get_login()) {
+						send(user, CommandPacket(CommandPacket::Reject, std::vector<std::wstring>()));
+						return;
+					}
+				}
+
+				sqlite3_stmt* statement;
+				sqlite3_prepare16_v2(m_server->m_db, "SELECT * FROM users WHERE (login=?) AND (password=?)", -1, &statement, 0);
+				
+				sqlite3_bind_text16(statement, 1, packet.get_arguments()[0].c_str(), -1, 0);
+				sqlite3_bind_text16(statement, 2, packet.get_arguments()[1].c_str(), -1, 0);
+
+				if (sqlite3_step(statement) == SQLITE_ROW) {
+					send(user, CommandPacket(CommandPacket::Reject, std::vector<std::wstring>()));
+				}
+				else {
+					send(user, CommandPacket(CommandPacket::Accept, std::vector<std::wstring>()));
+				}
+			}
+		},
+
+		{
+			CommandPacket::RoomList,
+			[this](User* user, CommandPacket packet) {
+				std::vector<std::wstring> room_list;
+				size_t current_beginning = 0;
+				for (std::list<std::unique_ptr<Room>>::iterator it_room = m_server->m_rooms.begin(); it_room != m_server->m_rooms.end(); it_room++) {
+					// 4 elements have reserved
+					for (int i = 0; i < 4; i++) {
+						room_list.push_back(std::wstring(L""));
+					}
+
+					room_list[current_beginning] = (*it_room)->get_name();
+
+					// Add white and black player login, if white or black player is empty then string is empty
+					for (std::list<User*>::iterator it_room_user = (*it_room)->get_users_list().begin(); it_room_user != (*it_room)->get_users_list().end(); it_room_user++) {
+						if ((*it_room_user)->get_role() == User::Role::White_player) {
+							room_list[current_beginning + 1] = (*it_room_user)->get_login();
+						}
+						else if ((*it_room_user)->get_role() == User::Role::Black_player) {
+							room_list[current_beginning + 2] = (*it_room_user)->get_login();
+						}
+					}
+
+					room_list[current_beginning + 3] = std::to_wstring((*it_room)->get_spectator_count());
+
+					current_beginning += 4;
+				}
+				send(user, CommandPacket(CommandPacket::RoomList, room_list));
+			}
+		},
+
+		{
 			CommandPacket::EnterRoom,
 			[](User* user, CommandPacket packet) {
 				user->set_role(User::Role::Spectator);
@@ -56,7 +112,12 @@ void PacketHandler::stop()
 
 void PacketHandler::send(User* user, CommandPacket packet)
 {
-	sf::Socket::Status status = user->get_socket()->send(packet.to_sfml_packet());
+	send(user, packet.to_sfml_packet());
+}
+
+void PacketHandler::send(User * user, sf::Packet packet)
+{
+	sf::Socket::Status status = user->get_socket()->send(packet);
 
 	Truelog::sync_print([&]() {
 		Truelog::stream(Truelog::StreamType::All) << Truelog::Type::Info << "Packet was sent to server (status=" << status << ")";

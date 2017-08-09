@@ -90,6 +90,7 @@
     <ClCompile Include="PacketHandler.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="Server.cpp" />
+    <ClCompile Include="SHA256.cpp" />
     <ClCompile Include="Truelog.cpp" />
     <ClCompile Include="User.cpp" />
   </ItemGroup>
@@ -98,6 +99,7 @@
     <ClInclude Include="PacketHandler.h" />
     <ClInclude Include="Room.h" />
     <ClInclude Include="Server.h" />
+    <ClInclude Include="SHA256.h" />
     <ClInclude Include="Truelog.h" />
     <ClInclude Include="User.h" />
   </ItemGroup>

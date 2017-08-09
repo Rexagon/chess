@@ -13,6 +13,7 @@ void User::set_room(Room* room)
 
 void User::set_role(const Role & role)
 {
+	m_role = role;
 }
 
 void User::set_login(const std::wstring & login)

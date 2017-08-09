@@ -27,6 +27,8 @@ public:
 	bool is_private() const;
 	bool is_chat_enabled() const;
 
+	unsigned int get_spectator_count() const;
+
 	std::list<User*>& get_users_list();
 private:
 	std::list<User*> m_users;
@@ -34,6 +36,7 @@ private:
 	std::wstring m_name;
 	std::wstring m_owner;
 
+	
 	bool m_is_private;
 	bool m_is_chat_enabled;
 

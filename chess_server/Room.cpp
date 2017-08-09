@@ -1,34 +1,7 @@
 #include "Room.h"
 
 std::map<signed char, std::function<void(Room*, User*, const CommandPacket&)>> Room::m_handlers = {
-	{ 
-		CommandPacket::EnterRoom,
-		[](Room* room, User* user, const CommandPacket& packet) {
-			user->set_role(User::Role::Spectator);
-			room->get_users_list().push_back(user);
-		} 
-	},
-
-	{
-		CommandPacket::LeaveRoom,
-		[](Room* room, User* user, const CommandPacket& packet) {
-			for (std::list<User*>::iterator it = room->get_users_list().begin(); it != room->get_users_list().end(); it++) {
-				if (user == (*it)) {
-					room->get_users_list().erase(it);
-					break;
-				}
-			}
-		}
-	},
-
-	{
-		CommandPacket::SendMessage,
-		[](Room* room, User* user, const CommandPacket& packet) {
-			for (std::list<User*>::iterator it = room->get_users_list().begin(); it != room->get_users_list().end(); it++) {
-				(*it)->get_socket()->send(packet.to_sfml_packet());
-			}
-		}
-	}
+	
 };
 
 
@@ -83,6 +56,19 @@ bool Room::is_private() const
 bool Room::is_chat_enabled() const
 {
 	return m_is_chat_enabled;
+}
+
+unsigned int Room::get_spectator_count() const
+{
+	unsigned int count = 0;
+
+	for (std::list<User*>::const_iterator it_user = m_users.begin(); it_user != m_users.end(); it_user++) {
+		if ((*it_user)->get_role() == User::Role::Spectator) {
+			count++;
+		}
+	}
+
+	return count;
 }
 
 std::list<User*>& Room::get_users_list()

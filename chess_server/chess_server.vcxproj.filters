@@ -20,6 +20,9 @@
     <ClCompile Include="Room.cpp">
       <Filter>server\room</Filter>
     </ClCompile>
+    <ClCompile Include="SHA256.cpp">
+      <Filter>SHA256</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommandPacket.h">
@@ -40,6 +43,9 @@
     <ClInclude Include="Room.h">
       <Filter>server\room</Filter>
     </ClInclude>
+    <ClInclude Include="SHA256.h">
+      <Filter>SHA256</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="server">
@@ -56,6 +62,9 @@
     </Filter>
     <Filter Include="server\room">
       <UniqueIdentifier>{decc7f97-ba02-4f4c-917a-66707965ad29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SHA256">
+      <UniqueIdentifier>{957f227b-f0f3-4a48-a1e4-f1871d5d2dba}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

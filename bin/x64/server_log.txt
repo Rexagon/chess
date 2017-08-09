@@ -3,11 +3,5 @@
 *   by Mechanic.     *
 **********************
 
-[INFO] [08.08.2017 22:20:15]: Start PacketHandler
-[INFO] [08.08.2017 22:20:27]: User was connected to server (ip=109.232.106.198)
-[INFO] [08.08.2017 22:20:30]: Packet was received (status=3, size=0)
-[DEBUG] [08.08.2017 22:20:30]: Removing user from his room...
-[DEBUG] [08.08.2017 22:20:30]: Remove socket from socket selector...
-[DEBUG] [08.08.2017 22:20:30]: Disconnect socket...
-[DEBUG] [08.08.2017 22:20:30]: Remove user from user list...
-[INFO] [08.08.2017 22:20:30]: User was disconnected from server (ip=0.0.0.0)
+[INFO] [09.08.2017 11:55:33]: A database has opened
+[INFO] [09.08.2017 11:55:33]: Start PacketHandler
