@@ -38,6 +38,6 @@ private:
 	static std::mutex m_socket_selector_mutex;
 	static sf::SocketSelector m_socket_selector;
 
-	static std::mutex m_command_handlers_mutex;
+	static std::recursive_mutex m_command_handlers_mutex;
 	static std::map<signed char, std::pair<std::function<void(const CommandPacket&)>, bool>> m_command_handlers;
 };

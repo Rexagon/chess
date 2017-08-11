@@ -13,11 +13,11 @@ public:
 	virtual void update(const float dt) {}
 	virtual void draw(const float dt) {}
 
-	virtual void pause() {}
-	virtual void resume() {}
-
 	virtual void focus_lost() {}
 	virtual void focus_gained() {}
+
+	virtual void scene_leave() {}
+	virtual void scene_return() {}
 
 	virtual void resized(float width, float height) {}
 protected:

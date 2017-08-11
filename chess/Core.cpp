@@ -18,8 +18,10 @@ void Core::init()
 
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 4;
-	m_window.create(sf::VideoMode(1024, 600), "CYBR", sf::Style::Default, settings);
+	m_window.create(sf::VideoMode(1280, 800), "CYBR", sf::Style::Default, settings);
 	m_window.setVerticalSyncEnabled(true);
+
+	CursorManager::init(m_window.getSystemHandle());
 }
 
 void Core::close()
@@ -31,6 +33,7 @@ void Core::close()
 
 	AssetManager::clear();
 	ConfigManager::close();
+	CursorManager::clear();
 }
 
 void Core::run()
@@ -148,7 +151,7 @@ void Core::handle_input(const float dt)
 			}
 			break;
 		case sf::Event::MouseWheelScrolled:
-			Input::m_mouse_wheel_delta = e.mouseWheelScroll.delta;
+			Input::m_mouse_wheel_delta = static_cast<int>(e.mouseWheelScroll.delta);
 		default:
 			break;
 		}

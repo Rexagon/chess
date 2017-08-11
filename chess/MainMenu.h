@@ -12,6 +12,9 @@ public:
 	void update(const float dt) override;
 	void draw(const float dt) override;
 
+	void scene_leave() override;
+	void scene_return() override;
+
 	void resized(float width, float height) override;
 private:
 	enum class MenuState {

@@ -53,12 +53,19 @@ public:
 
     void prepare_deleting(widget_ptr widget);
 
-	// Вспомогательная функция для создания GUI объектов
+	void press_item(widget_ptr item);
+	void focus_item(widget_ptr item);
+
+	Widget* get_current_hovered_item() { return m_current_hovered_item.get(); }
+	Widget* get_current_pressed_item() { return m_current_pressed_item.get(); }
+	Widget* get_current_focused_item() { return m_current_focused_item.get(); }
+
 	template<class T, class... Args>
-	static std::shared_ptr<T> create(const Args&... args)
+	std::shared_ptr<T> create(const Args&... args)
 	{
 		static_assert(std::is_base_of<Widget, T>::value, "GUI::Create template argument must be the child class of \"Widget\" class");
 		std::shared_ptr<T> widget = std::shared_ptr<T>(new T(args...));
+		widget->m_gui = this;
 		return std::move(widget);
 	}
 private:

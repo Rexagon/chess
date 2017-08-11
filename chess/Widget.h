@@ -92,6 +92,8 @@ public:
 	bool is_hovered() const { return m_is_hovered; }
 	bool is_pressed() const { return m_is_pressed; }
 
+	GUI* get_gui() { return m_gui; }
+
 	unsigned int get_id() const { return m_id; }
 
 	virtual char get_type() const;
@@ -126,6 +128,8 @@ protected:
 	bool m_is_pressed;
 
 	std::vector<std::function<void(Widget*)>> m_actions;
+
+	GUI* m_gui;
 
 	static unsigned int CURRENT_ID;
 	unsigned int m_id;

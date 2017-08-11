@@ -71,7 +71,4 @@ namespace math
 
 	// Возвращает вектор проекции b на a
 	vec2 vector_projection(const vec2& a, const vec2& b);
-
-	std::string make_hash(const std::string& text);
-	std::wstring make_hash(const std::wstring& text);
 }

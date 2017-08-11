@@ -13,7 +13,7 @@ sf::TcpSocket Client::m_socket;
 std::mutex Client::m_socket_selector_mutex;
 sf::SocketSelector Client::m_socket_selector;
 
-std::mutex Client::m_command_handlers_mutex;
+std::recursive_mutex Client::m_command_handlers_mutex;
 std::map<signed char, std::pair<std::function<void(const CommandPacket&)>, bool>> Client::m_command_handlers;
 
 
@@ -59,13 +59,13 @@ void Client::send_command(const CommandPacket & packet, std::function<void(sf::S
 
 void Client::add_command_handler(signed char command, std::function<void(const CommandPacket&)> handler, bool temp)
 {
-	std::unique_lock<std::mutex> lock(m_command_handlers_mutex);
+	std::unique_lock<std::recursive_mutex> lock(m_command_handlers_mutex);
 	m_command_handlers[command] = std::make_pair(handler, temp);
 }
 
 void Client::remove_command_handler(signed char command)
 {
-	std::unique_lock<std::mutex> lock(m_command_handlers_mutex);
+	std::unique_lock<std::recursive_mutex> lock(m_command_handlers_mutex);
 	auto it = m_command_handlers.find(command);
 	if (it != m_command_handlers.end()) {
 		m_command_handlers.erase(it);
@@ -98,19 +98,12 @@ void Client::packets_handler()
 
 void Client::solve_command_packet(CommandPacket packet)
 {
-	switch (packet.get_command())
-	{
-	default:
-	{
-		std::unique_lock<std::mutex> lock(m_command_handlers_mutex);
-		auto it = m_command_handlers.find(packet.get_command());
-		if (it != m_command_handlers.end()) {
-			it->second.first(packet);
-			if (it->second.second == true) {
-				m_command_handlers.erase(it);
-			}
+	std::unique_lock<std::recursive_mutex> lock(m_command_handlers_mutex);
+	auto it = m_command_handlers.find(packet.get_command());
+	if (it != m_command_handlers.end()) {
+		it->second.first(packet);
+		if (it->second.second == true) {
+			m_command_handlers.erase(it);
 		}
-		break;
-	}
 	}
 }

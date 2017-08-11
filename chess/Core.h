@@ -6,8 +6,8 @@
 #include "AssetManager.h"
 #include "SoundManager.h"
 #include "ConfigManager.h"
+#include "CursorManager.h"
 #include "Client.h"
-#include "Cursor.h"
 #include "State.h"
 #include "Input.h"
 #include "GUI.h"
@@ -48,8 +48,10 @@ public:
 		static_assert(std::is_base_of<State, T>::value, "Core::AddState<T>() - T must be child of State");
 
 		if (!m_states.empty()) {
-			m_states.top()->pause();
+			m_states.top()->scene_leave();
 		}
+
+		CursorManager::set_style(CursorManager::Normal);
 
 		m_states.push(std::unique_ptr<T>(new T(std::forward<Args>(args)...)));
 		m_states.top()->init();
@@ -72,7 +74,7 @@ public:
 		}
 
 		if (!m_states.empty()) {
-			m_states.top()->resume();
+			m_states.top()->scene_return();
 		}
 	}
 

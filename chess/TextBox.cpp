@@ -84,13 +84,13 @@ void TextBox::handle_text_enter(sf::Uint32 text)
 	else if (text == 1) { // left
 
 	}
-	else if (text == 3) { // right
+	else if (text == 2) { // right
 
 	}
 	else if (text == 13) {
 
 	}
-	else if (m_max_text_length == 0 || current_text.getSize() < m_max_text_length) {
+	else if (text > 31 && (m_max_text_length == 0 || current_text.getSize() < m_max_text_length)) {
 		current_text.insert(new_caret_position, text);
 		new_caret_position++;
 	}

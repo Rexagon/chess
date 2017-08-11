@@ -157,7 +157,7 @@ void Label::update()
 
 sf::String Label::make_wordwrapped_text(sf::String text)
 {
-	unsigned currentOffset = 0;
+	float currentOffset = 0;
 	bool firstWord = true;
 	std::size_t wordBegining = 0;
 

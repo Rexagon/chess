@@ -31,6 +31,7 @@ MainMenu::MainMenu()
 	// Creating login input
 	m_input_login = create_textbox(false);
 	m_input_login->set_text(ConfigManager::get<std::wstring>("login"));
+	m_gui.focus_item(m_input_login);
 
 	// Creating password label
 	m_label_password = create_label(L"Пароль");
@@ -54,7 +55,7 @@ MainMenu::MainMenu()
 	});
 
 	// Creating register button
-	m_button_register = create_button(L"Создать аккаунт");
+	m_button_register = create_button(L"Регистрация");
 
 	m_button_register->bind(Widget::Press, [this](Widget* widget) {
 		switch(this->m_state) {
@@ -105,6 +106,29 @@ void MainMenu::update(const float dt)
 	if (Input::get_key_down(Key::Escape)) {
 		Core::delete_state();
 		return;
+	}
+
+	if (Input::get_key_down(Key::Tab) || Input::get_key_down(Key::Return)) {
+		Widget* focusedItem = m_gui.get_current_focused_item();
+
+		if (focusedItem == m_input_login.get()) {
+			m_gui.focus_item(m_input_password);
+		}
+		else if (focusedItem == m_input_password.get())
+		{
+			if (m_state == MenuState::Authorization) {
+				m_gui.focus_item(m_button_login);
+			}
+			else if (m_state == MenuState::Registration) {
+				m_gui.focus_item(m_input_password_repeat);
+			}
+		}
+		else if (focusedItem == m_input_password_repeat.get()) {
+			m_gui.focus_item(m_button_register);
+		}
+		else {
+			m_gui.focus_item(m_input_login);
+		}
 	}
 }
 
@@ -176,6 +200,17 @@ void MainMenu::draw(const float dt)
 	m_gui.draw();
 }
 
+void MainMenu::scene_leave()
+{
+}
+
+void MainMenu::scene_return()
+{
+	// Update layout
+	vec2 window_size = vec2(Core::get_window()->getSize());
+	resized(window_size.x, window_size.y);
+}
+
 void MainMenu::update_menu_state(MenuState state)
 {
 	m_state = state;
@@ -242,7 +277,7 @@ void MainMenu::make_authorization()
 	Client::add_command_handler(CommandPacket::Signin, [this, login, password](const CommandPacket& packet) {
 		update_menu_state(MenuState::Authorization);
 
-		if (packet.get_arguments()[0] == L"t") {
+		if (packet.get_arguments()[0] == L"1") {
 			ConfigManager::add("login", login.toWideString());
 			ConfigManager::add("password", password.toWideString());
 			Core::add_state<RoomsList>();
@@ -283,8 +318,9 @@ void MainMenu::make_registration()
 	}
 
 	Client::add_command_handler(CommandPacket::Signup, [this](const CommandPacket& packet) {
-		if (packet.get_arguments()[0] == L"t") {
+		if (packet.get_arguments()[0] == L"1") {
 			this->update_menu_state(MenuState::Authorization);
+			this->m_gui.focus_item(nullptr);
 			this->show_info(L"Вы успешно зарегистрировались");
 		}
 		else {
@@ -326,14 +362,18 @@ std::shared_ptr<Label> MainMenu::create_button(const std::wstring & text)
 	button->set_font_size(16);
 	button->set_text(text);
 	button->bind(Widget::Hover, [](Widget* widget) {
-		SystemCursor cursor(SystemCursor::Hand);
-		cursor.set(Core::get_window()->getSystemHandle());
+		CursorManager::set_style(CursorManager::Hand);
 		widget->set_background_color(sf::Color(160, 160, 160, 255));
 	});
 	button->bind(Widget::Unhover, [](Widget* widget) {
-		SystemCursor cursor(SystemCursor::Normal);
-		cursor.set(Core::get_window()->getSystemHandle());
+		CursorManager::set_style(CursorManager::Normal);
 		widget->set_background_color(sf::Color(180, 180, 180, 255));
+	});
+	button->bind(Widget::Focus, [](Widget* widget) {
+		widget->set_outline_color(sf::Color(200, 200, 255, 200));
+	});
+	button->bind(Widget::Unfocus, [](Widget* widget) {
+		widget->set_outline_color(sf::Color(120, 120, 120, 200));
 	});
 
 	m_gui.get_root_widget()->get_layout()->add_widget(button);
@@ -357,16 +397,14 @@ std::shared_ptr<TextBox> MainMenu::create_textbox(bool masked)
 		text_box->set_masking_character('*');
 	}
 	text_box->bind(Widget::Hover, [](Widget* widget) {
-		SystemCursor cursor(SystemCursor::Text);
-		cursor.set(Core::get_window()->getSystemHandle());
+		CursorManager::set_style(CursorManager::Text);
 
 		if (!widget->is_focused()) {
 			widget->set_outline_color(sf::Color(160, 160, 160, 200));
 		}
 	});
 	text_box->bind(Widget::Unhover, [](Widget* widget) {
-		SystemCursor cursor(SystemCursor::Normal);
-		cursor.set(Core::get_window()->getSystemHandle());
+		CursorManager::set_style(CursorManager::Normal);
 
 		if (!widget->is_focused()) {
 			widget->set_outline_color(sf::Color(120, 120, 120, 200));

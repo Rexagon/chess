@@ -5,9 +5,6 @@
     <ClCompile Include="Core.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="AssetManager.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="GUI.cpp">
       <Filter>GUI</Filter>
     </ClCompile>
@@ -25,9 +22,6 @@
     </ClCompile>
     <ClCompile Include="ShaderAsset.cpp">
       <Filter>Assets</Filter>
-    </ClCompile>
-    <ClCompile Include="SoundManager.cpp">
-      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="TextureAsset.cpp">
       <Filter>Assets</Filter>
@@ -59,9 +53,6 @@
     <ClCompile Include="TextBox.cpp">
       <Filter>GUI\Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="Cursor.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Client.cpp">
       <Filter>Network</Filter>
     </ClCompile>
@@ -71,15 +62,24 @@
     <ClCompile Include="RoomsList.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="AssetManager.cpp">
+      <Filter>Core\Managers</Filter>
+    </ClCompile>
     <ClCompile Include="ConfigManager.cpp">
-      <Filter>Core</Filter>
+      <Filter>Core\Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>Core\Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="CursorManager.cpp">
+      <Filter>Core\Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSession.cpp">
+      <Filter>Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core.h">
-      <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="AssetManager.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="GUI.h">
@@ -99,9 +99,6 @@
     </ClInclude>
     <ClInclude Include="ShaderAsset.h">
       <Filter>Assets</Filter>
-    </ClInclude>
-    <ClInclude Include="SoundManager.h">
-      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="TextureAsset.h">
       <Filter>Assets</Filter>
@@ -139,9 +136,6 @@
     <ClInclude Include="TextBox.h">
       <Filter>GUI\Widgets</Filter>
     </ClInclude>
-    <ClInclude Include="Cursor.h">
-      <Filter>Core</Filter>
-    </ClInclude>
     <ClInclude Include="Client.h">
       <Filter>Network</Filter>
     </ClInclude>
@@ -151,8 +145,20 @@
     <ClInclude Include="RoomsList.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="AssetManager.h">
+      <Filter>Core\Managers</Filter>
+    </ClInclude>
     <ClInclude Include="ConfigManager.h">
-      <Filter>Core</Filter>
+      <Filter>Core\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>Core\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="CursorManager.h">
+      <Filter>Core\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSession.h">
+      <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -176,6 +182,9 @@
     </Filter>
     <Filter Include="Network">
       <UniqueIdentifier>{f54a50c0-82ad-4198-b308-76c449a795a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Managers">
+      <UniqueIdentifier>{f5732df9-7ffd-4cd9-a944-6cac7de5152b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

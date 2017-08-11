@@ -38,7 +38,7 @@ void GUI::update(const float dt)
 		Widget* widget = widgets.top();
 		widgets.pop();
 
-		if (widget->m_layout) {
+		if (widget!= nullptr && widget->m_layout) {
 			std::vector<widget_ptr>& children = widget->m_layout->m_ordered_widgets;
 
 			// проверка наведения
@@ -92,25 +92,24 @@ void GUI::update(const float dt)
 						orderedWidgets.end());
 		}
 
-		m_current_hovered_item->m_is_pressed = true;
-		m_current_hovered_item->trigger(Widget::Action::Press);
-		m_current_pressed_item = m_current_hovered_item;
+		press_item(m_current_hovered_item);
 
 		if (m_current_focused_item != m_current_hovered_item) {
-			if (m_current_focused_item != nullptr) {
-				m_current_focused_item->trigger(Widget::Action::Unfocus);
-				m_current_focused_item->m_is_focused = false;
-			}
-			m_current_hovered_item->trigger(Widget::Action::Focus);
-			m_current_hovered_item->m_is_focused = true;
-			m_current_focused_item = m_current_hovered_item;
+			focus_item(m_current_pressed_item);
+		}
+	}
+
+	if (m_current_focused_item != nullptr) {
+		if (Input::get_key_down(Key::Return)) {
+			press_item(m_current_focused_item);
+		}
+		else if (Input::get_key_up(Key::Return)) {
+			press_item(nullptr);
 		}
 	}
 
 	if (m_current_pressed_item != nullptr && Input::get_mouse_up(MouseButton::Left)) {
-		m_current_pressed_item->m_is_pressed = false;
-		m_current_pressed_item->trigger(Widget::Action::Release);
-		m_current_pressed_item = nullptr;
+		press_item(nullptr);
 	}
 }
 
@@ -123,12 +122,12 @@ void GUI::draw()
 		Widget* widget = widgets.top();
 		widgets.pop();
 
-		if (widget->m_layout) {
-			std::vector<widget_ptr>& children = widget->m_layout->m_ordered_widgets;
-
-			for (auto& child : children) {
-				child->on_draw();
-				widgets.push(child.get());
+		if (widget != nullptr && widget->m_layout) {
+			for (auto& child : widget->m_layout->m_ordered_widgets) {
+				if (child != nullptr) {
+					child->on_draw();
+					widgets.push(child.get());
+				}
 			}
 		}
     }
@@ -155,4 +154,30 @@ void GUI::prepare_deleting(widget_ptr widget)
     if (widget == m_current_pressed_item) {
         m_current_pressed_item.reset();
     }
+}
+
+void GUI::press_item(widget_ptr item)
+{
+	if (item == nullptr && m_current_pressed_item != nullptr) {
+		m_current_pressed_item->m_is_pressed = false;
+		m_current_pressed_item->trigger(Widget::Action::Release);
+	}
+	else {
+		item->m_is_pressed = true;
+		item->trigger(Widget::Action::Press);
+	}
+	m_current_pressed_item = item;
+}
+
+void GUI::focus_item(widget_ptr item)
+{
+	if (m_current_focused_item != nullptr) {
+		m_current_focused_item->trigger(Widget::Action::Unfocus);
+		m_current_focused_item->m_is_focused = false;
+	}
+	if (item != nullptr) {
+		item->trigger(Widget::Action::Focus);
+		item->m_is_focused = true;
+	}
+	m_current_focused_item = item;
 }

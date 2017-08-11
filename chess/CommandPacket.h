@@ -13,10 +13,11 @@ public:
 		Signout,
 		Accept,
 		Reject,
-		RoomsList,
-		EnterRoom,
-		LeaveRoom,
+		RoomList,
+		FigureMove,
+		ChangeRoom,
 		SendMessage,
+		RoomSettings,
 
 		TypesCount
 	};

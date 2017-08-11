@@ -11,7 +11,7 @@ public:
 	static void close();
 
 	template <class T>
-	void add(const std::string& name, const T& value)
+	static void add(const std::string& name, const T& value)
 	{
 		m_config[name] = value;
 	}
@@ -20,9 +20,8 @@ public:
 
 	static bool has(const std::string& name);
 
-	template <typename T>
-	static typename std::enable_if<std::is_same<T, std::wstring>::value, T>::type 
-		get(const std::string& name) 
+	template <class T>
+	static typename std::enable_if<std::is_same<T, std::wstring>::value, T>::type get(const std::string& name) 
 	{
 		if (has(name)) {
 			std::vector<char> data = m_config[name];
@@ -41,9 +40,8 @@ public:
 		}
 	}
 
-	template <typename T>
-	static typename std::enable_if<!std::is_same<T, std::wstring>::value, T>::type
-		get(const std::string& name)
+	template <class T>
+	static typename std::enable_if<!std::is_same<T, std::wstring>::value, T>::type get(const std::string& name)
 	{
 		if (has(name)) {
 			return m_config[name].get<T>();
@@ -53,5 +51,7 @@ public:
 		}
 	}
 private:
+	static void encrypt_decrypt(std::vector<uint8_t>& data);
+
 	static json m_config;
 };

@@ -16,6 +16,7 @@ Widget::Widget() :
 {
 	Log::write("Widget", m_id, "created");
 	m_actions.resize(ActionsNum, [](Widget*) {});
+	set_background_color(sf::Color::Transparent);
 }
 
 Widget::~Widget()
