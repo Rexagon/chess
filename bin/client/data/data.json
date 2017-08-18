@@ -6,6 +6,10 @@
 		"menu_background": "menu_background.png",
 		"menu_logo": "logo.png",
 
-		"rooms_background": "rooms_background.jpg"
+		"rooms_background": "rooms_background.jpg",
+
+		"game_background": "game_background.png",
+		"game_figures": "figures.png",
+		"game_chess_board": "chess_board.png"
 	}
 }

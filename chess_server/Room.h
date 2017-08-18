@@ -23,14 +23,14 @@ public:
 		bool chat_enabled);
 	~Room();
 
-	static void init(sqlite3*& db, std::list<std::unique_ptr<Room>>& rooms);
-
 	int add_user(User* user);
 	int erase_user(User* user);
 	void set_name(const std::wstring& name);
 	void set_owner(const std::wstring& owner);
-	void set_private(bool state);
-	void set_chat_enabled(bool state);
+	void set_white_player(const std::wstring& white_player);
+	void set_black_player(const std::wstring& black_player);
+	void set_privacy(bool privacy);
+	void set_chat_enabled(bool chat_enabled);
 
 	std::wstring get_name() const;
 	std::wstring get_owner() const;
@@ -51,6 +51,6 @@ private:
 	std::wstring m_white_player;
 	std::wstring m_black_player;
 	
-	bool m_is_private;
+	bool m_privacy;
 	bool m_is_chat_enabled;
 };

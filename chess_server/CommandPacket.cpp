@@ -1,5 +1,63 @@
 #include "CommandPacket.h"
 
+std::map<signed char, std::wstring> CommandPacket::packet_types = {
+
+	{
+		CommandPacket::Signin,
+		L"Signin"
+	},
+
+	{
+		CommandPacket::Signup,
+		L"Signup"
+	},
+
+	{
+		CommandPacket::Signout,
+		L"Signout"
+	},
+
+	{
+		CommandPacket::Accept,
+		L"Accept"
+	},
+
+	{
+		CommandPacket::Reject,
+		L"Reject"
+	},
+
+	{
+		CommandPacket::RoomList,
+		L"RoomList"
+	},
+
+	{
+		CommandPacket::ChangeRole,
+		L"ChangeRole"
+	},
+
+	{
+		CommandPacket::FigureMove,
+		L"FigureMove"
+	},
+
+	{
+		CommandPacket::ChangeRoom,
+		L"ChangeRoom"
+	},
+
+	{
+		CommandPacket::SendMessage,
+		L"SendMessage"
+	},
+
+	{
+		CommandPacket::RoomSettings,
+		L"RoomSettings"
+	},
+};
+
 CommandPacket::CommandPacket(sf::Packet packet)
 {
 	m_is_valid = packet >> m_command;

@@ -4,9 +4,6 @@
     <ClCompile Include="CommandPacket.cpp">
       <Filter>server\packets</Filter>
     </ClCompile>
-    <ClCompile Include="PacketHandler.cpp">
-      <Filter>server\packets</Filter>
-    </ClCompile>
     <ClCompile Include="Truelog.cpp">
       <Filter>server\truelog</Filter>
     </ClCompile>
@@ -23,12 +20,21 @@
     <ClCompile Include="SHA256.cpp">
       <Filter>SHA256</Filter>
     </ClCompile>
+    <ClCompile Include="RoomManager.cpp">
+      <Filter>server\room\RoomManager</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketHandler.cpp">
+      <Filter>server\packets\PacketHandler</Filter>
+    </ClCompile>
+    <ClCompile Include="ChessBoard.cpp">
+      <Filter>server\room\ChessBoard</Filter>
+    </ClCompile>
+    <ClCompile Include="Figure.cpp">
+      <Filter>server\room\ChessBoard\Figure</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommandPacket.h">
-      <Filter>server\packets</Filter>
-    </ClInclude>
-    <ClInclude Include="PacketHandler.h">
       <Filter>server\packets</Filter>
     </ClInclude>
     <ClInclude Include="Truelog.h">
@@ -45,6 +51,18 @@
     </ClInclude>
     <ClInclude Include="SHA256.h">
       <Filter>SHA256</Filter>
+    </ClInclude>
+    <ClInclude Include="RoomManager.h">
+      <Filter>server\room\RoomManager</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketHandler.h">
+      <Filter>server\packets\PacketHandler</Filter>
+    </ClInclude>
+    <ClInclude Include="ChessBoard.h">
+      <Filter>server\room\ChessBoard</Filter>
+    </ClInclude>
+    <ClInclude Include="Figure.h">
+      <Filter>server\room\ChessBoard\Figure</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -65,6 +83,18 @@
     </Filter>
     <Filter Include="SHA256">
       <UniqueIdentifier>{957f227b-f0f3-4a48-a1e4-f1871d5d2dba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="server\room\RoomManager">
+      <UniqueIdentifier>{81bd6daa-eb90-4256-96ca-7d27ca4b93ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="server\packets\PacketHandler">
+      <UniqueIdentifier>{84a6ff21-ea2e-48d2-978a-1c9994fcf505}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="server\room\ChessBoard">
+      <UniqueIdentifier>{6a30bd99-b5d6-4e69-bb81-f25e8f8c91dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="server\room\ChessBoard\Figure">
+      <UniqueIdentifier>{af22f884-ec37-44c3-b3dc-926f99675669}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

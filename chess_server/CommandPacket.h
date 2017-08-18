@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <map>
 
 #include <SFML/Network.hpp>
 
@@ -14,12 +15,16 @@ public:
 		Accept,
 		Reject,
 		RoomList,
+		ChangeRole,
+		FigureMove,
 		ChangeRoom,
 		SendMessage,
 		RoomSettings,
 
 		TypesCount
 	};
+
+	static std::map<signed char, std::wstring> packet_types;
 
 	CommandPacket(sf::Packet packet);
 	CommandPacket(signed char command, const std::vector<std::wstring>& arguments);

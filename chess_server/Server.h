@@ -13,6 +13,7 @@
 #include <sqlite3.h>
 
 #include "PacketHandler.h"
+#include "RoomManager.h"
 #include "User.h"
 #include "Room.h"
 
@@ -24,8 +25,10 @@ public:
 	void run();
 private:
 	friend class PacketHandler;
+	friend class RoomManager;
 
 	PacketHandler m_packet_handler;
+	RoomManager m_room_manager;
 
 	sf::TcpListener m_listener;
 	sf::SocketSelector m_socket_selector;

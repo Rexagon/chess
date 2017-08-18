@@ -12,9 +12,9 @@ public:
 	// No racism, only business
 	enum class Role {
 		None = -1,
-		Spectator,
-		White_player,
-		Black_player
+		Spectator = 0,
+		White_player = 1,
+		Black_player = 2
 	};
 
 	User(std::shared_ptr<sf::TcpSocket> socket);

@@ -2,7 +2,7 @@
 
 using namespace std::chrono_literals;
 
-Server::Server(unsigned short port) : m_is_run(true), m_port(port), m_packet_handler(this)
+Server::Server(unsigned short port) : m_is_run(true), m_port(port), m_packet_handler(this), m_room_manager(this)
 {
 }
 
@@ -30,7 +30,7 @@ void Server::run()
 		throw std::exception("Can\'t open or create a database.");
 	}
 
-	Room::init(m_db, m_rooms);
+	m_room_manager.init();
 
 	Truelog::stream() << Truelog::Type::Info << "A database has opened";
 
