@@ -42,7 +42,7 @@ void TextBox::set_text(const std::wstring & text)
 
 	sf::FloatRect textBounds = m_text_geometry.getLocalBounds();
 	set_minimum_size(textBounds.width, textBounds.height);
-	update();
+	update_geometry();
 	
 	m_caret_position = text.size();
 }

@@ -14,6 +14,7 @@ public:
 		Accept,
 		Reject,
 		RoomList,
+		ChangeRole,
 		FigureMove,
 		ChangeRoom,
 		SendMessage,

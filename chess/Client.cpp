@@ -7,7 +7,7 @@ std::thread Client::packets_handler_thread;
 unsigned short Client::m_port;
 bool Client::m_is_running;
 
-std::string Client::m_login;
+std::wstring Client::m_login;
 
 sf::TcpSocket Client::m_socket;
 std::mutex Client::m_socket_selector_mutex;
@@ -40,12 +40,12 @@ void Client::close()
 	std::unique_lock<std::mutex> lock(m_socket_selector_mutex);
 }
 
-void Client::set_login(const std::string & login)
+void Client::set_login(const std::wstring & login)
 {
 	m_login = login;
 }
 
-std::string Client::get_login()
+std::wstring Client::get_login()
 {
 	return m_login;
 }

@@ -9,11 +9,10 @@ void HorizontalLayout::update()
 
 	float column_width = (size.x - (m_items.size() + 1.0f) * m_spacing) / m_items.size();
 	float column_height = size.y - m_spacing * 2.0f;
-	vec2 rowSize(column_width, column_height);
 
 	for (unsigned int i = 0; i < m_items.size(); ++i) {
 		Item& item = m_items[i];
-		item.widget->set_size(rowSize);
+		item.widget->set_size(column_width, column_height);
 		vec2 item_size = item.widget->get_size();
 
 		vec2 item_position;

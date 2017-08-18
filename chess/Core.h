@@ -48,7 +48,11 @@ public:
 		static_assert(std::is_base_of<State, T>::value, "Core::AddState<T>() - T must be child of State");
 
 		if (!m_states.empty()) {
-			m_states.top()->scene_leave();
+			State* state = m_states.top().get();
+			state->scene_leave();
+			state->m_gui.press_item(nullptr);
+			state->m_gui.focus_item(nullptr);
+			state->m_gui.hover_item(nullptr);
 		}
 
 		CursorManager::set_style(CursorManager::Normal);

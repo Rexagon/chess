@@ -9,11 +9,10 @@ void VerticalLayout::update()
 
 	float row_width = size.x - m_spacing * 2.0f;
 	float row_height = (size.y - (m_items.size() + 1.0f) * m_spacing) / m_items.size();
-	vec2 rowSize(row_width, row_height);
 
 	for (unsigned int i = 0; i < m_items.size(); ++i) {
 		Item& item = m_items[i];
-		item.widget->set_size(rowSize);
+		item.widget->set_size(row_width, row_height);
 		vec2 item_size = item.widget->get_size();
 
 		vec2 item_position;

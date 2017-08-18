@@ -16,8 +16,8 @@ public:
 	static void init(const std::string& ip, unsigned short port);
 	static void close();
 
-	static void set_login(const std::string& login);
-	static std::string get_login();
+	static void set_login(const std::wstring& login);
+	static std::wstring get_login();
 
 	static void send_command(const CommandPacket& packet, std::function<void(sf::Socket::Status)> callback = [](sf::Socket::Status) {});
 
@@ -32,7 +32,7 @@ private:
 	static unsigned short m_port;
 	static bool m_is_running;
 
-	static std::string m_login;
+	static std::wstring m_login;
 
 	static sf::TcpSocket m_socket;
 	static std::mutex m_socket_selector_mutex;

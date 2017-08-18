@@ -18,7 +18,7 @@ void Core::init()
 
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 4;
-	m_window.create(sf::VideoMode(1280, 800), "CYBR", sf::Style::Default, settings);
+	m_window.create(sf::VideoMode(1280, 800), "Chess club", sf::Style::Default, settings);
 	m_window.setVerticalSyncEnabled(true);
 
 	CursorManager::init(m_window.getSystemHandle());
@@ -48,10 +48,6 @@ void Core::run()
 		handle_input(dt);
 
 		State* currentState = nullptr;
-
-		if (currentState = get_state()) {
-			currentState->m_gui.update(dt);
-		}
 
 		if (currentState = get_state()) {
 			currentState->update(dt);
@@ -104,56 +100,69 @@ void Core::handle_input(const float dt)
 		case sf::Event::Closed:
 			Core::stop();
 			break;
+
+
 		case sf::Event::GainedFocus:
-			if (current_state) {
+			if (current_state != nullptr) {
 				current_state->focus_gained();
 			}
 			break;
+
+
 		case sf::Event::LostFocus:
-			if (current_state) {
+			if (current_state != nullptr) {
 				current_state->focus_lost();
 			}
 			break;
+
+
 		case sf::Event::Resized:
-			if (current_state) {
+			if (current_state != nullptr) {
 				current_state->resized(static_cast<float>(e.size.width), static_cast<float>(e.size.height));
 			}
+			break;
+
+
 		case sf::Event::MouseMoved:
 			Input::m_mouse_position = vec2(static_cast<float>(e.mouseMove.x), static_cast<float>(e.mouseMove.y));
 			break;
+
+
 		case sf::Event::KeyPressed:
 			if (e.key.code > -1 && e.key.code < sf::Keyboard::KeyCount) {
 				Input::m_current_keys_state[e.key.code] = true;
-
-				if (e.key.code >= Key::Left && e.key.code <= Key::Down) {
-					current_state->m_gui.text_entered(e.key.code - 70); // 71-74 to ascii 25-28
-				}
 			}
 			break;
+
+
 		case sf::Event::KeyReleased:
 			if (e.key.code > -1 && e.key.code < sf::Keyboard::KeyCount) {
 				Input::m_current_keys_state[e.key.code] = false;
 			}
 			break;
-		case sf::Event::TextEntered:
-			if (current_state) {
-				current_state->m_gui.text_entered(e.text.unicode);
-			}
-			break;
+
+
 		case sf::Event::MouseButtonPressed:
 			if (e.mouseButton.button > -1 && e.mouseButton.button < sf::Mouse::ButtonCount) {
 				Input::m_current_mouse_buttons_state[e.mouseButton.button] = true;
 			}
 			break;
+
+
 		case sf::Event::MouseButtonReleased:
 			if (e.mouseButton.button > -1 && e.mouseButton.button < sf::Mouse::ButtonCount) {
 				Input::m_current_mouse_buttons_state[e.mouseButton.button] = false;
 			}
 			break;
+
+
 		case sf::Event::MouseWheelScrolled:
 			Input::m_mouse_wheel_delta = static_cast<int>(e.mouseWheelScroll.delta);
-		default:
 			break;
+		}
+
+		if (current_state != nullptr) {
+			current_state->m_gui.handle_input(e);
 		}
 	}
 }

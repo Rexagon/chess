@@ -2,12 +2,13 @@
 
 #include "GUI.h"
 #include "Log.h"
+
 Layout::Layout() :
     m_parent(nullptr), m_spacing(0.0f)
 {
 }
 
-Layout::Layout(widget_ptr parent) :
+Layout::Layout(std::shared_ptr<Widget> parent) :
 	m_parent(parent.get())
 {
 	parent->set_layout(this);
@@ -19,7 +20,7 @@ Layout::~Layout()
 	m_ordered_widgets.clear();
 }
 
-void Layout::add_widget(widget_ptr widget)
+void Layout::add_widget(std::shared_ptr<Widget> widget)
 {
 	widget->set_parent(m_parent);
 	m_ordered_widgets.push_back(widget);
@@ -27,7 +28,7 @@ void Layout::add_widget(widget_ptr widget)
 	update();
 }
 
-void Layout::remove_widget(widget_ptr widget)
+void Layout::remove_widget(std::shared_ptr<Widget> widget)
 {
 	for (auto it = m_items.begin(); it != m_items.end(); ++it) {
 		if ((*it).widget == widget.get()) {
@@ -44,7 +45,7 @@ void Layout::remove_widget(widget_ptr widget)
 	update();
 }
 
-int Layout::index_of(widget_ptr widget) const
+int Layout::index_of(std::shared_ptr<Widget> widget) const
 {
 	for (unsigned int i = 0; i < m_items.size(); ++i) {
 		if (m_items[i].widget == widget.get()) {
@@ -88,7 +89,7 @@ void Layout::set_alignment(int alignment)
 	update();
 }
 
-void Layout::set_alignment(widget_ptr widget, int alignment)
+void Layout::set_alignment(std::shared_ptr<Widget> widget, int alignment)
 {
 	if (!(alignment & GUI::AlignLeft ||
 		alignment & GUI::AlignRight ||

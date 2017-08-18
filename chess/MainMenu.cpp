@@ -103,13 +103,15 @@ MainMenu::~MainMenu()
 
 void MainMenu::update(const float dt)
 {
+	m_gui.update(dt);
+
 	if (Input::get_key_down(Key::Escape)) {
 		Core::delete_state();
 		return;
 	}
 
 	if (Input::get_key_down(Key::Tab) || Input::get_key_down(Key::Return)) {
-		Widget* focusedItem = m_gui.get_current_focused_item();
+		Widget* focusedItem = m_gui.get_focused_item();
 
 		if (focusedItem == m_input_login.get()) {
 			m_gui.focus_item(m_input_password);
@@ -197,7 +199,11 @@ void MainMenu::draw(const float dt)
 {
 	Core::draw(m_background_sprite);
 	Core::draw(m_logo);
-	m_gui.draw();
+
+	{
+		std::unique_lock<std::recursive_mutex> lock(m_gui_mutex);
+		m_gui.draw();
+	}
 }
 
 void MainMenu::scene_leave()
@@ -213,6 +219,8 @@ void MainMenu::scene_return()
 
 void MainMenu::update_menu_state(MenuState state)
 {
+	std::unique_lock<std::recursive_mutex> lock(m_gui_mutex);
+
 	m_state = state;
 
 	switch (m_state)
@@ -248,12 +256,14 @@ void MainMenu::update_menu_state(MenuState state)
 
 void MainMenu::show_error(const std::wstring & text)
 {
+	std::unique_lock<std::recursive_mutex> lock(m_gui_mutex);
 	m_label_message->set_color(sf::Color(250, 10, 10));
 	m_label_message->set_text(text);
 }
 
 void MainMenu::show_info(const std::wstring & text)
 {
+	std::unique_lock<std::recursive_mutex> lock(m_gui_mutex);
 	m_label_message->set_color(sf::Color::Green);
 	m_label_message->set_text(text);
 }
@@ -280,6 +290,7 @@ void MainMenu::make_authorization()
 		if (packet.get_arguments()[0] == L"1") {
 			ConfigManager::add("login", login.toWideString());
 			ConfigManager::add("password", password.toWideString());
+			Client::set_login(login.toWideString());
 			Core::add_state<RoomsList>();
 		}
 		else {

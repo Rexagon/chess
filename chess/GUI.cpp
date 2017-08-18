@@ -9,7 +9,7 @@ GUI::GUI() :
 {
 	sf::Vector2u windowSize = Core::get_window()->getSize();
 
-	m_root_widget = std::shared_ptr<Widget>(new Widget);
+	m_root_widget = create<Widget>();
 	m_root_widget->set_position(0.0f, 0.0f);
 	m_root_widget->set_size(static_cast<float>(windowSize.x), static_cast<float>(windowSize.y));
 	m_root_widget->set_layout(new Layout);
@@ -26,10 +26,7 @@ GUI::~GUI()
 
 void GUI::update(const float dt)
 {
-	vec2 mouse_position = Input::get_mouse_position();
-
-	widget_ptr hovered_item = nullptr;
-	int hovered_item_index = -1;
+	std::shared_ptr<Widget> hovered_item;
 
 	std::stack<Widget*> widgets;
 	widgets.push(m_root_widget.get());
@@ -38,78 +35,89 @@ void GUI::update(const float dt)
 		Widget* widget = widgets.top();
 		widgets.pop();
 
-		if (widget!= nullptr && widget->m_layout) {
-			std::vector<widget_ptr>& children = widget->m_layout->m_ordered_widgets;
+		if (widget != nullptr && widget->m_layout != nullptr) {
+			for (unsigned int i = 0; i < widget->m_layout->m_ordered_widgets.size(); ++i) {
+				auto& child = widget->m_layout->m_ordered_widgets[i];
 
-			// проверка наведения
-			int itemIndex = -1;
-			for (unsigned int i = 0; i < children.size(); ++i) {
 				if (i == 0) {
 					widget->m_layout->update();
 				}
-				if (children[i]->get_rect().contains(mouse_position.x, mouse_position.y) &&
-					children[i]->is_visible()) {
-					itemIndex = i;
-					hovered_item = children[i];
+
+				if (child != nullptr) {
+					if (child->get_rect().contains(Input::get_mouse_position()) &&
+						child->is_visible())
+					{
+						hovered_item = child;
+					}
+
+					child->on_update(dt);
+					widgets.push(child.get());
 				}
 			}
-
-			if (itemIndex > -1) {
-				hovered_item_index = itemIndex;
-			}
-
-			// обновление
-			for (auto& child : children) {
-				child->on_update(dt);
-				widgets.push(child.get());
-			}
 		}
 	}
 
-	// при изменеии наведённого элемента
-    if (hovered_item != m_current_hovered_item) {
-		if (m_current_hovered_item != nullptr) {
-			m_current_hovered_item->m_is_hovered = false;
-			m_current_hovered_item->trigger(Widget::Action::Unhover);
-			m_current_hovered_item = nullptr;
-		}
+	hover_item(hovered_item);
 
-        if (hovered_item != nullptr) {
-			m_current_hovered_item = hovered_item;
-			m_current_hovered_item->m_is_hovered = true;
-			m_current_hovered_item->trigger(Widget::Action::Hover);
-		}
-	}
 
 	// обработка нажатия
-	if (m_current_hovered_item != nullptr && Input::get_mouse_down(MouseButton::Left) &&
-		m_current_hovered_item->is_enabled()) 
+	if (Input::get_mouse_down(MouseButton::Left) &&
+		m_current_hovered_item != nullptr && m_current_hovered_item->is_enabled())
 	{
 		// двигаем нажатый элемент наверх по Z
-		if (hovered_item_index > -1) {
-			auto& orderedWidgets = m_current_hovered_item->get_parent()->m_layout->m_ordered_widgets;
-			std::rotate(orderedWidgets.begin() + hovered_item_index, orderedWidgets.begin() + hovered_item_index + 1,
-						orderedWidgets.end());
+		if (m_current_hovered_item->m_parent != nullptr && m_current_hovered_item->m_parent->m_layout != nullptr) {
+			int item_index = m_current_hovered_item->m_parent->m_layout->index_of(m_current_hovered_item);
+			if (item_index > -1) {
+				auto& orderedWidgets = m_current_hovered_item->get_parent()->m_layout->m_ordered_widgets;
+				std::rotate(orderedWidgets.begin() + item_index, orderedWidgets.begin() + item_index + 1, orderedWidgets.end());
+			}
 		}
 
 		press_item(m_current_hovered_item);
-
-		if (m_current_focused_item != m_current_hovered_item) {
-			focus_item(m_current_pressed_item);
-		}
+		focus_item(m_current_pressed_item);
 	}
 
-	if (m_current_focused_item != nullptr) {
-		if (Input::get_key_down(Key::Return)) {
-			press_item(m_current_focused_item);
-		}
-		else if (Input::get_key_up(Key::Return)) {
-			press_item(nullptr);
-		}
-	}
-
-	if (m_current_pressed_item != nullptr && Input::get_mouse_up(MouseButton::Left)) {
+	if (Input::get_mouse_up(MouseButton::Left) &&
+		m_current_pressed_item != nullptr) 
+	{
 		press_item(nullptr);
+	}
+
+	if (Input::get_key_down(Key::Return)) {
+		press_item(m_current_focused_item);
+	}
+	else if (Input::get_key_up(Key::Return)) {
+		press_item(nullptr);
+	}
+
+}
+
+void GUI::handle_input(const sf::Event & event)
+{
+	TextBox* current_textbox = nullptr;
+
+	if (m_current_focused_item != nullptr &&
+		m_current_focused_item->get_type() == WidgetType::TextBoxWidget)
+	{
+		current_textbox = reinterpret_cast<TextBox*>(m_current_focused_item.get());
+	}
+
+	switch (event.type) {
+	case sf::Event::KeyPressed:
+		if (current_textbox != nullptr &&
+			event.key.code >= Key::Left && event.key.code <= Key::Down)
+		{
+			current_textbox->handle_text_enter(event.key.code - 70); // 71-74 to ascii 1-4
+		}
+		break;
+
+
+	case sf::Event::TextEntered:
+		if (current_textbox != nullptr)
+		{
+			current_textbox->handle_text_enter(event.text.unicode);
+		}
+		break;
 	}
 }
 
@@ -122,7 +130,7 @@ void GUI::draw()
 		Widget* widget = widgets.top();
 		widgets.pop();
 
-		if (widget != nullptr && widget->m_layout) {
+		if (widget != nullptr && widget->m_layout != nullptr) {
 			for (auto& child : widget->m_layout->m_ordered_widgets) {
 				if (child != nullptr) {
 					child->on_draw();
@@ -133,51 +141,95 @@ void GUI::draw()
     }
 }
 
-void GUI::text_entered(sf::Uint32 text)
+std::shared_ptr<Widget> GUI::get_element(const vec2 & screen_position)
 {
-	if (m_current_focused_item != nullptr && 
-		m_current_focused_item->get_type() == WidgetType::TextBoxWidget) 
-	{
-		TextBox* label = reinterpret_cast<TextBox*>(m_current_focused_item.get());
-		label->handle_text_enter(text);
+	std::shared_ptr<Widget> hovered_item;
+
+	std::stack<Widget*> widgets;
+	widgets.push(m_root_widget.get());
+
+	while (!widgets.empty()) {
+		Widget* widget = widgets.top();
+		widgets.pop();
+
+		if (widget != nullptr && widget->m_layout != nullptr) {
+			for (auto& child : widget->m_layout->m_ordered_widgets) {
+				if (child != nullptr) {
+					if (child->get_rect().contains(Input::get_mouse_position()) &&
+						child->is_visible())
+					{
+						hovered_item = child;
+					}
+
+					widgets.push(child.get());
+				}
+			}
+		}
 	}
+
+	return hovered_item;
 }
 
-void GUI::prepare_deleting(widget_ptr widget)
+void GUI::prepare_deleting(Widget* widget)
 {
-    if (widget == m_current_focused_item) {
+    if (widget == m_current_focused_item.get()) {
         m_current_focused_item.reset();
     }
-    if (widget == m_current_hovered_item) {
+    if (widget == m_current_hovered_item.get()) {
         m_current_hovered_item.reset();
     }
-    if (widget == m_current_pressed_item) {
+    if (widget == m_current_pressed_item.get()) {
         m_current_pressed_item.reset();
     }
 }
 
-void GUI::press_item(widget_ptr item)
+void GUI::press_item(std::shared_ptr<Widget> item)
 {
-	if (item == nullptr && m_current_pressed_item != nullptr) {
+	if (m_current_pressed_item == item) return;
+
+	if (m_current_pressed_item != nullptr) {
 		m_current_pressed_item->m_is_pressed = false;
 		m_current_pressed_item->trigger(Widget::Action::Release);
 	}
-	else {
+
+	if (item != nullptr) {
 		item->m_is_pressed = true;
 		item->trigger(Widget::Action::Press);
 	}
+
 	m_current_pressed_item = item;
 }
 
-void GUI::focus_item(widget_ptr item)
+void GUI::focus_item(std::shared_ptr<Widget> item)
 {
+	if (m_current_focused_item == item) return;
+
 	if (m_current_focused_item != nullptr) {
 		m_current_focused_item->trigger(Widget::Action::Unfocus);
 		m_current_focused_item->m_is_focused = false;
 	}
+
 	if (item != nullptr) {
 		item->trigger(Widget::Action::Focus);
 		item->m_is_focused = true;
 	}
+
 	m_current_focused_item = item;
+}
+
+void GUI::hover_item(std::shared_ptr<Widget> item)
+{
+	if (m_current_hovered_item == item) return;
+
+	if (m_current_hovered_item != nullptr) {
+		m_current_hovered_item->trigger(Widget::Action::Unhover);
+		m_current_hovered_item->m_is_hovered = false;
+	}
+
+	if (item != nullptr) {
+		item->trigger(Widget::Action::Hover);
+		item->m_is_hovered = true;
+	}
+
+	m_current_hovered_item = item;
 }

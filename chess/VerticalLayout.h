@@ -6,7 +6,7 @@ class VerticalLayout : public Layout
 {
 public:
 	VerticalLayout() : Layout() {}
-	VerticalLayout(widget_ptr widget) : Layout(widget) {}
+	VerticalLayout(std::shared_ptr<Widget> widget) : Layout(widget) {}
 private:
 	void update() override;
 };

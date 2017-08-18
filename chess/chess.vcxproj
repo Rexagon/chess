@@ -88,11 +88,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AssetManager.cpp" />
+    <ClCompile Include="Board.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="CommandPacket.cpp" />
     <ClCompile Include="ConfigManager.cpp" />
     <ClCompile Include="Core.cpp" />
     <ClCompile Include="CursorManager.cpp" />
+    <ClCompile Include="Figure.cpp" />
     <ClCompile Include="FontAsset.cpp" />
     <ClCompile Include="GameSession.cpp" />
     <ClCompile Include="GUI.cpp" />
@@ -117,11 +119,13 @@
   <ItemGroup>
     <ClInclude Include="Asset.h" />
     <ClInclude Include="AssetManager.h" />
+    <ClInclude Include="Board.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="CommandPacket.h" />
     <ClInclude Include="ConfigManager.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="CursorManager.h" />
+    <ClInclude Include="Figure.h" />
     <ClInclude Include="FontAsset.h" />
     <ClInclude Include="GameSession.h" />
     <ClInclude Include="GUI.h" />

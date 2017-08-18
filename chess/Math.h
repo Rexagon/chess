@@ -10,6 +10,7 @@
 using vec2 = sf::Vector2f;
 using vec2i = sf::Vector2i;
 using vec2u = sf::Vector2u;
+using vec2c = sf::Vector2<char>;
 
 using vec3 = sf::Vector3f;
 using vec3i = sf::Vector3i;

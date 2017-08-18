@@ -6,7 +6,7 @@ class HorizontalLayout : public Layout
 {
 public:
 	HorizontalLayout() : Layout() {}
-	HorizontalLayout(widget_ptr widget) : Layout(widget) {}
+	HorizontalLayout(std::shared_ptr<Widget> widget) : Layout(widget) {}
 protected:
 	void update() override;
 };

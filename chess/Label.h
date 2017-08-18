@@ -43,7 +43,7 @@ protected:
 	void on_draw() override;
 
 	// Обновляет геометрию
-	void update() override;
+	void update_geometry() override;
 
 	sf::String make_wordwrapped_text(sf::String text);
 

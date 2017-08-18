@@ -41,6 +41,7 @@ private:
 	};
 
 	std::vector<Room> m_rooms;
-	std::mutex m_rooms_mutex;
 	std::vector<std::shared_ptr<Widget>> m_rooms_widgets;
+
+	std::recursive_mutex m_gui_mutex;
 };

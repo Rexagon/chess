@@ -31,6 +31,7 @@ public:
 		ActionsNum
 	};
 	
+	Widget();
 	virtual ~Widget();
 
 	void set_parent(Widget* widget);
@@ -100,8 +101,6 @@ public:
 protected:
 	friend class GUI;
 
-	Widget();
-
 	// Вызывается каждый кадр до отрисовки
 	virtual void on_update(const float dt) {}
 
@@ -109,7 +108,7 @@ protected:
 	virtual void on_draw();
 
 	// Вызывается при изменении геометрии
-	virtual void update() {}
+	virtual void update_geometry();
 
 	Widget* m_parent;
 
@@ -134,5 +133,3 @@ protected:
 	static unsigned int CURRENT_ID;
 	unsigned int m_id;
 };
-
-typedef std::shared_ptr<Widget> widget_ptr;

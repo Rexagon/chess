@@ -11,22 +11,22 @@ public:
 	Layout();
 
 	// Создаёт лжйаут и привязывает его к parent
-	Layout(widget_ptr parent);
+	Layout(std::shared_ptr<Widget> parent);
 
 	virtual ~Layout();
 
 	// Добавляет виджет и обновляет лэйаут
-	virtual void add_widget(widget_ptr widget);
+	virtual void add_widget(std::shared_ptr<Widget> widget);
 
 	// Удаляет виджет и обновляет лэйаут
-	virtual void remove_widget(widget_ptr widget);
+	virtual void remove_widget(std::shared_ptr<Widget> widget);
 
 	// Возвращает номер виджета внутри лэйаута
 	//@ если виджет не найдён, вернёт -1
-	virtual int index_of(widget_ptr widget) const;
+	virtual int index_of(std::shared_ptr<Widget> widget) const;
 
 	// Возвращает виджет под указанным номером
-	//@ если такой не найдёт, вернёт nullptr
+	//@ если такой не найден, вернёт nullptr
 	virtual Widget* take_at(int index) const;
 
     void clear();
@@ -40,7 +40,7 @@ public:
 	//@ если такого элемента нет, то ничего не произойдёт
 	//@ если не указанно выравнивание по какой-нибудь из осей
 	//@ то для этой оси по умолчанию будет выравнивание по центру
-	void set_alignment(widget_ptr widget, int alignment);
+	void set_alignment(std::shared_ptr<Widget> widget, int alignment);
 
 	// Устанавливает отступы между элементами и отступы от краёв лэйаута
 	void set_spacing(float spacing) { m_spacing = spacing; }
@@ -66,5 +66,5 @@ protected:
 		int alignment;
 	};
 	std::vector<Item> m_items;
-	std::vector<widget_ptr> m_ordered_widgets;
+	std::vector<std::shared_ptr<Widget>> m_ordered_widgets;
 };

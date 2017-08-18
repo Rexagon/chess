@@ -77,6 +77,12 @@
     <ClCompile Include="GameSession.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="Figure.cpp">
+      <Filter>Game\Board</Filter>
+    </ClCompile>
+    <ClCompile Include="Board.cpp">
+      <Filter>Game\Board</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core.h">
@@ -160,6 +166,12 @@
     <ClInclude Include="GameSession.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="Figure.h">
+      <Filter>Game\Board</Filter>
+    </ClInclude>
+    <ClInclude Include="Board.h">
+      <Filter>Game\Board</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="GUI">
@@ -185,6 +197,9 @@
     </Filter>
     <Filter Include="Core\Managers">
       <UniqueIdentifier>{f5732df9-7ffd-4cd9-a944-6cac7de5152b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Board">
+      <UniqueIdentifier>{38c4c50b-2183-47ea-b2fe-505f91bd6152}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

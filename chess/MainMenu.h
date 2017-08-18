@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "State.h"
 #include "GUI.h"
 
@@ -54,4 +56,6 @@ private:
 	std::shared_ptr<Label> m_button_exit;
 
 	std::shared_ptr<Label> m_label_message;
+
+	std::recursive_mutex m_gui_mutex;
 };

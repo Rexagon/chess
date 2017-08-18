@@ -5,24 +5,21 @@
 
 unsigned int Widget::CURRENT_ID = 0;
 
-char Widget::get_type() const
-{
-	return GUI::WidgetType::EmptyWidget;
-}
-
 Widget::Widget() :
-	m_parent(nullptr), m_layout(nullptr), m_is_enabled(true), m_is_visible(true), 
+	m_parent(nullptr), m_layout(nullptr), m_is_enabled(true), m_is_visible(true),
+	m_is_focused(false), m_is_hovered(false), m_is_pressed(false),
 	m_id(CURRENT_ID++), m_minimum_size(0.0f, 0.0f), m_maximum_size(16384.0f, 16384.0f)
 {
-	Log::write("Widget", m_id, "created");
 	m_actions.resize(ActionsNum, [](Widget*) {});
 	set_background_color(sf::Color::Transparent);
 }
 
 Widget::~Widget()
 {
+	if (m_gui != nullptr) {
+		m_gui->prepare_deleting(this);
+	}
 	delete m_layout;
-	Log::write("Widget", m_id, "deleted");
 }
 
 void Widget::set_parent(Widget* widget)
@@ -39,6 +36,17 @@ void Widget::on_draw()
 {
 	if (m_is_visible) {
 		Core::get_window()->draw(m_geometry);
+	}
+}
+
+void Widget::update_geometry()
+{
+	if (m_parent != nullptr && m_parent->m_layout != nullptr) {
+		m_parent->m_layout->update();
+	}
+
+	if (m_layout != nullptr) {
+		m_layout->update();
 	}
 }
 
@@ -176,7 +184,7 @@ void Widget::set_size(float width, float height)
 	}
 
 	m_geometry.setSize(sf::Vector2f(width, height));
-	update();
+	update_geometry();
 }
 
 void Widget::set_size(const vec2 & size)
@@ -193,7 +201,7 @@ vec2 Widget::get_size() const
 void Widget::set_position(float x, float y)
 {
 	m_geometry.setPosition(x, y);
-	update();
+	update_geometry();
 }
 
 void Widget::set_position(const vec2 & position)
@@ -220,7 +228,7 @@ sf::FloatRect Widget::get_rect() const
 void Widget::set_origin(const vec2 & origin)
 {
 	m_geometry.setOrigin(origin.x, origin.y);
-	update();
+	update_geometry();
 }
 
 vec2 Widget::get_origin() const
@@ -281,4 +289,9 @@ void Widget::set_visible(bool visible)
 			m_actions[Hide](this);
 		}
 	}
+}
+
+char Widget::get_type() const
+{
+	return GUI::WidgetType::EmptyWidget;
 }

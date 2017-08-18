@@ -42,14 +42,14 @@ void Label::set_text(const std::wstring & text)
 	m_text_geometry.setString(string);
 	sf::FloatRect textBounds = m_text_geometry.getLocalBounds();
 	set_minimum_size(textBounds.width, textBounds.height);
-	update();
+	update_geometry();
 }
 
 void Label::set_font(sf::Font* font)
 {
 	m_font = font;
 	m_text_geometry.setFont(*font);
-	update();
+	update_geometry();
 }
 
 void Label::set_alignment(int alignment)
@@ -67,20 +67,20 @@ void Label::set_alignment(int alignment)
 	}
 
 	m_alignment = alignment;
-	update();
+	update_geometry();
 }
 
 void Label::set_wordwrap_enabled(bool enabled)
 {
 	m_wordwrap = enabled;
 	set_text(m_text_geometry.getString().toWideString());
-	update();
+	update_geometry();
 }
 
 void Label::set_padding(float padding)
 {
 	m_padding = padding;
-	update();
+	update_geometry();
 }
 
 void Label::set_color(const sf::Color & color)
@@ -103,7 +103,7 @@ void Label::set_font_size(int size)
 	m_text_geometry.setCharacterSize(size);
 	sf::FloatRect textBounds = m_text_geometry.getLocalBounds();
 	set_minimum_size(textBounds.width, textBounds.height);
-	update();
+	update_geometry();
 }
 
 void Label::set_font_style(unsigned int style)
@@ -124,7 +124,7 @@ void Label::on_draw()
 	}
 }
 
-void Label::update()
+void Label::update_geometry()
 {
 	sf::FloatRect textBounds = m_text_geometry.getLocalBounds();
 	sf::FloatRect bounds = m_geometry.getGlobalBounds();
@@ -153,6 +153,8 @@ void Label::update()
 	position.x = ceilf(position.x);
 	position.y = ceilf(position.y);
 	m_text_geometry.setPosition(position);
+
+	//Widget::update_geometry();
 }
 
 sf::String Label::make_wordwrapped_text(sf::String text)

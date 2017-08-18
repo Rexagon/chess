@@ -3,57 +3,18 @@
 #include "Core.h"
 
 GameSession::GameSession(const std::wstring& name) :
-	m_room_name(name), m_cell_widgets(64)
+	m_room_name(name), m_cell_widgets(64), m_selected_cell(-1, -1), m_selected_widget(nullptr),
+	m_player_type(Spectator)
 {
+	CursorManager::set_style(CursorManager::Normal);
+
 	sf::Texture* background_texture = AssetManager::get<sf::Texture>("game_background");
 	background_texture->setSmooth(true);
 	m_background_sprite.setTexture(*background_texture, true);
 	m_background_sprite.setOrigin(vec2(background_texture->getSize()) / 2.0f);
-
-	sf::Texture* board_texture = AssetManager::get<sf::Texture>("game_chess_board");
-	board_texture->setSmooth(true);
-	m_board_sprite.setTexture(*board_texture, true);
-	m_board_sprite.setOrigin(vec2(board_texture->getSize()) / 2.0f);
-
-	sf::Texture* figures_texture = AssetManager::get<sf::Texture>("game_figures");
-	figures_texture->setSmooth(true);
-	for (unsigned int i = 0; i < 6; ++i) {
-		for (unsigned int j = 0; j < 2; ++j) {
-			recti texture_rect(i * 128.0f, j * 128.0f, 128.0f, 128.0f);
-			m_figure_sprites.push_back(sf::Sprite(*figures_texture, texture_rect));
-		}
-	}
 	
 	// Create GUI
-	m_widget_board = m_gui.create<Widget>();
-	Layout* board_layout = new Layout(m_widget_board);
-
-	auto hover_function = [this](Widget* widget) {
-		widget->set_background_color(sf::Color(100, 100, 100, 100));
-	};
-	auto unhover_function = [this](Widget* widget) {
-		widget->set_background_color(sf::Color::Transparent);
-	};
-	auto press_function = [this](Widget* widget) {
-		
-	};
-
-	for (unsigned int i = 0; i < m_cell_widgets.size(); ++i) {
-		std::shared_ptr<Widget> cell_widget = m_gui.create<Widget>();
-
-		cell_widget->set_outline_color(sf::Color::Transparent);
-		cell_widget->set_outline_thickness(1.0f);
-
-		cell_widget->bind(Widget::Hover, hover_function);
-		cell_widget->bind(Widget::Unhover, unhover_function);
-		cell_widget->bind(Widget::Press, press_function);
-
-		board_layout->add_widget(cell_widget);
-		m_cell_widgets[i] = cell_widget;
-	}
-
-	m_gui.get_root_widget()->get_layout()->add_widget(m_widget_board);
-
+	//TODO: add chat and music here
 
 	// Update layout
 	vec2 window_size = vec2(Core::get_window()->getSize());
@@ -63,7 +24,6 @@ GameSession::GameSession(const std::wstring& name) :
 GameSession::~GameSession()
 {
 	Client::remove_command_handler(CommandPacket::RoomSettings);
-
 	Client::send_command(CommandPacket(CommandPacket::ChangeRoom, {}));
 }
 
@@ -73,27 +33,41 @@ void GameSession::init()
 		if (packet.get_arguments_count() == 7) {
 			std::vector<std::wstring> arguments = packet.get_arguments();
 			m_room_name = arguments[1];
-			std::wstring owner = arguments[2];
-			std::wstring white_player = arguments[3];
-			std::wstring black_player = arguments[4];
-			bool is_private = arguments[5] == L"1";
-			bool is_chat_enabled = arguments[6] == L"1";
+			
+			m_white_player = arguments[3];
+			m_black_player = arguments[4];
 
-			std::wcout <<
-				"name:         " << m_room_name << "\n" <<
-				"owner:        " << owner << "\n" <<
-				"white_player: " << white_player << "\n" <<
-				"black_player: " << black_player << "\n" <<
-				"is_private:   " << is_private << "\n" <<
-				"chat_enabled: " << is_chat_enabled << "\n";
+			if (Client::get_login() == m_white_player) {
+				m_player_type = WhitePlayer;
+				m_board.set_main_color(Figure::Color::White);
+				m_board.init_field();
+				init_board_gui();
+			}
+			else if (Client::get_login() == m_black_player) {
+				m_player_type = BlackPlayer;
+				m_board.set_main_color(Figure::Color::Black);
+				m_board.init_field();
+				init_board_gui();
+			}
+			else {
+				m_player_type = Spectator;
+				m_board.set_main_color(Figure::Color::White);
+				m_board.init_field();
+			}
+
+			m_is_private = arguments[5] == L"1";
+			m_is_chat_enabled = arguments[6] == L"1";
+			m_can_change_settings = arguments[2] == Client::get_login();
 		}
-	});
+	}, true);
 
 	Client::send_command(CommandPacket(CommandPacket::RoomSettings, { m_room_name }));
 }
 
 void GameSession::update(const float dt)
 {
+	m_gui.update(dt);
+
 	if (Input::get_key_down(Key::Escape)) {
 		Core::delete_state();
 		return;
@@ -103,13 +77,12 @@ void GameSession::update(const float dt)
 void GameSession::draw(const float dt)
 {
 	Core::draw(m_background_sprite);
-	Core::draw(m_board_sprite);
+
+	m_board.draw_board(Core::get_window());
 
 	m_gui.draw();
 
-	for (unsigned int i = 0; i < m_figure_sprites.size(); ++i) {
-		Core::draw(m_figure_sprites[i]);
-	}
+	m_board.draw_figures(Core::get_window());
 }
 
 void GameSession::resized(float width, float height)
@@ -128,7 +101,7 @@ void GameSession::resized(float width, float height)
 	m_background_sprite.setScale(scale, scale);
 
 	// Board layout
-	vec2 board_size = vec2(m_board_sprite.getTexture()->getSize());
+	vec2 board_size = m_board.get_size();
 	vec2 board_position = vec2((width - board_size.x) / 2.0f, height / 2.0f);
 	if (board_position.x < (board_size.x + 20.0f) / 2.0f) {
 		board_position.x = (board_size.x + 20.0f) / 2.0f;
@@ -136,25 +109,141 @@ void GameSession::resized(float width, float height)
 	board_position.x = ceilf(board_position.x);
 	board_position.y = ceilf(board_position.y);
 
-	m_board_sprite.setPosition(board_position);
+	m_board.setPosition(board_position);
 
-	vec2 field_offset = vec2(54.0f, 54.0f) - board_size / 2.0f;
-	field_offset.x = ceilf(field_offset.x);
-	field_offset.y = ceilf(field_offset.y);
+	if (m_player_type != Spectator && m_board.is_initialized() == true) {
+		vec2 field_offset = board_position + vec2(54.0f, 54.0f) - board_size / 2.0f;
+		field_offset.x = ceilf(field_offset.x);
+		field_offset.y = ceilf(field_offset.y);
 
-	float cell_width = 74.0f;
+		for (unsigned int i = 0; i < 8; ++i) {
+			for (unsigned int j = 0; j < 8; ++j) {
+				vec2 cell_position;
+				if (m_player_type == WhitePlayer) {
+					cell_position = vec2(i * m_board.get_cell_size().x, (7 - j) * m_board.get_cell_size().y);
+				}
+				else {
+					cell_position = vec2((7 - i) * m_board.get_cell_size().x, j * m_board.get_cell_size().y);
+				}
 
-	for (unsigned int i = 0; i < 6; ++i) {
-		for (unsigned int j = 0; j < 2; ++j) {
-			m_figure_sprites[i * 2 + j].setScale(0.57f, 0.57f);
-			m_figure_sprites[i * 2 + j].setPosition(board_position + field_offset + vec2(i, j) * cell_width);
+				m_cell_widgets[i * 8 + j]->set_position(field_offset + cell_position);
+			}
 		}
 	}
+}
+
+void GameSession::init_board_gui()
+{
+	m_widget_board = m_gui.create<Widget>();
+	Layout* board_layout = new Layout(m_widget_board);
+
+	auto press_function = [this](Widget* widget, const vec2c& current_move) {
+		for (const auto& possible_move : this->m_possible_moves) {
+			if (current_move == possible_move) {
+				this->m_board.move_figure(m_selected_cell, current_move);
+
+				this->set_cell_highlight(this->m_selected_widget, HighlightDisabled);
+
+				for (const auto& possible_move : this->m_possible_moves) {
+					this->set_cell_highlight(this->m_cell_widgets[possible_move.x * 8 + possible_move.y].get(), HighlightDisabled);
+				}
+
+				this->m_selected_cell = vec2c(-1, -1);
+				this->m_selected_widget = nullptr;
+				this->m_possible_moves.clear();
+
+				return;
+			}
+		}
+
+		if (this->m_board.can_select(current_move)) {
+			if (this->m_selected_widget != nullptr) {
+				this->set_cell_highlight(this->m_selected_widget, HighlightDisabled);
+
+				for (const auto& possible_move : this->m_possible_moves) {
+					this->set_cell_highlight(this->m_cell_widgets[possible_move.x * 8 + possible_move.y].get(), HighlightDisabled);
+				}
+			}
+
+			this->set_cell_highlight(widget, HighlightSelected);
+
+			this->m_selected_cell = current_move;
+			this->m_selected_widget = widget;
+			this->m_possible_moves = this->m_board.get_possible_moves(current_move.x, current_move.y);
+
+			for (const auto& possible_move : this->m_possible_moves) {
+				this->set_cell_highlight(this->m_cell_widgets[possible_move.x * 8 + possible_move.y].get(), HighlightPossible);
+			}
+		}
+		else if (this->m_selected_widget != nullptr) {
+			this->set_cell_highlight(this->m_selected_widget, HighlightDisabled);
+
+			for (const auto& possible_move : this->m_possible_moves) {
+				this->set_cell_highlight(this->m_cell_widgets[possible_move.x * 8 + possible_move.y].get(), HighlightDisabled);
+			}
+
+			this->m_selected_cell = vec2c(-1, -1);
+			this->m_selected_widget = nullptr;
+			this->m_possible_moves.clear();
+		}
+	};
+
+	auto release_function = [this](Widget* widget, const vec2c& current_move) {
+	};
 
 	for (unsigned int i = 0; i < 8; ++i) {
 		for (unsigned int j = 0; j < 8; ++j) {
-			m_cell_widgets[i * 8 + j]->set_position(board_position + field_offset + vec2(i, j) * cell_width);
-			m_cell_widgets[i * 8 + j]->set_size(cell_width, cell_width);
+			std::shared_ptr<Widget> cell_widget = m_gui.create<Widget>();
+			cell_widget->set_size(m_board.get_cell_size());
+
+			vec2c current_move;
+			if (m_player_type == WhitePlayer) {
+				current_move = vec2c(i, 7 - j);
+			}
+			else {
+				current_move = vec2c(7 - i, j);
+			}
+
+			cell_widget->bind(Widget::Press, std::bind(press_function, std::placeholders::_1, current_move));
+			cell_widget->bind(Widget::Release, std::bind(release_function, std::placeholders::_1, current_move));
+
+			board_layout->add_widget(cell_widget);
+			m_cell_widgets[current_move.x * 8 + current_move.y] = cell_widget;
 		}
+	}
+
+	m_gui.get_root_widget()->get_layout()->add_widget(m_widget_board);
+
+	// Update layout
+	vec2 window_size = vec2(Core::get_window()->getSize());
+	resized(window_size.x, window_size.y);
+}
+
+void GameSession::set_cell_highlight(Widget * widget, HighlightType highlight_type)
+{
+	switch (highlight_type)
+	{
+	case GameSession::HighlightDisabled:
+		widget->set_outline_color(sf::Color::Transparent);
+		widget->set_size(m_board.get_cell_size());
+		widget->set_position(widget->get_position() - vec2(1.5f, 1.5f) * widget->get_outline_thickness());
+		widget->set_outline_thickness(0.0f);
+		break;
+
+
+	case GameSession::HighlightSelected:
+		widget->set_outline_color(sf::Color(230, 255, 10));
+		widget->set_outline_thickness(2.0f);
+		widget->set_size(m_board.get_cell_size() - vec2(3.0f, 3.0f) * widget->get_outline_thickness());
+		widget->set_position(widget->get_position() + vec2(1.5f, 1.5f) * widget->get_outline_thickness());
+		break;
+
+
+	case GameSession::HighlightPossible:
+		widget->set_outline_color(sf::Color(0, 200, 10));
+		widget->set_outline_thickness(2.0f);
+		widget->set_size(m_board.get_cell_size() - vec2(3.0f, 3.0f) * widget->get_outline_thickness());
+		widget->set_position(widget->get_position() + vec2(1.5f, 1.5f) * widget->get_outline_thickness());
+		break;
 	}
 }

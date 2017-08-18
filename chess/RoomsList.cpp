@@ -17,6 +17,7 @@ RoomsList::RoomsList()
 	m_form_list->set_enabled(false);
 	m_form_list->set_padding(9.0f);
 	m_form_list->set_font_size(18);
+	m_gui.get_root_widget()->get_layout()->add_widget(m_form_list);
 
 	m_widget_list = m_gui.create<Widget>();
 	m_widget_list->set_background_color(sf::Color(30, 30, 30, 220));
@@ -45,11 +46,11 @@ void RoomsList::init()
 	}, false);
 
 	Client::add_command_handler(CommandPacket::RoomList, [this](const CommandPacket& packet) {
+
 		std::vector<std::wstring> arguments = packet.get_arguments();
 		unsigned int arguments_count = arguments.size();
 
 		if (packet.is_valid() && arguments_count % 4 == 0) {
-			std::unique_lock<std::mutex> lock(m_rooms_mutex);
 			m_rooms.clear();
 
 			for (unsigned int i = 0; i < arguments_count; i += 4) {
@@ -66,11 +67,11 @@ void RoomsList::init()
 					Log::write("unable to parse room #" + std::to_string(i));
 				}
 			}
-		}
 
-		this->update_rooms_list();
-		vec2 window_size = vec2(Core::get_window()->getSize());
-		resized(window_size.x, window_size.y);
+			this->update_rooms_list();
+			vec2 window_size = vec2(Core::get_window()->getSize());
+			resized(window_size.x, window_size.y);
+		}
 	}, false);
 
 	Client::send_command(CommandPacket(CommandPacket::RoomList, {}));
@@ -78,6 +79,11 @@ void RoomsList::init()
 
 void RoomsList::update(const float dt)
 {
+	{
+		std::unique_lock<std::recursive_mutex> lock(m_gui_mutex);
+		m_gui.update(dt);
+	}
+
 	if (Input::get_key_down(Key::Escape)) {
 		Core::delete_state();
 	}
@@ -86,7 +92,11 @@ void RoomsList::update(const float dt)
 void RoomsList::draw(const float dt)
 {
 	Core::draw(m_background_sprite);
-	m_gui.draw();
+
+	{
+		std::unique_lock<std::recursive_mutex> lock(m_gui_mutex);
+		m_gui.draw();
+	}
 }
 
 void RoomsList::resized(float width, float height)
@@ -129,17 +139,17 @@ void RoomsList::resized(float width, float height)
 	m_widget_list->set_size(form_size.x, (line_height + 10.0f) * rooms_per_page - 10.0f);
 
 	for (unsigned int i = 0; i < rooms_per_page; ++i) {
-		m_rooms_widgets[i]->set_position(form_position.x - 1.0f, form_position.y + (line_height + 10.0f) * (i + 1));
-		m_rooms_widgets[i]->set_size(form_size.x + 2.0f, line_height);
+		m_rooms_widgets[i]->set_position(form_position.x + 2.0f, form_position.y + (line_height + 10.0f) * (i + 1));
+		m_rooms_widgets[i]->set_size(form_size.x - 4.0f, line_height);
 	}
 }
 
 void RoomsList::update_rooms_list()
 {
-	std::unique_lock<std::mutex> lock(m_rooms_mutex);
+	std::unique_lock<std::recursive_mutex> lock(m_gui_mutex);
 
-	m_widget_list->get_layout()->clear();
 	m_rooms_widgets.clear();
+	Layout* layout = new Layout(m_widget_list);
 
 	for (Room room : m_rooms) {
 		std::shared_ptr<Widget> widget = m_gui.create<Widget>();
@@ -198,7 +208,7 @@ void RoomsList::update_rooms_list()
 		label_players->bind(Widget::Press, press_function);
 		label_spectators->bind(Widget::Press, press_function);
 
-		m_widget_list->get_layout()->add_widget(widget);
+		layout->add_widget(widget);
 		m_rooms_widgets.push_back(widget);
 	}
 }
@@ -212,8 +222,6 @@ std::shared_ptr<Label> RoomsList::create_label(const std::wstring & text)
 	label->set_padding(10.0f);
 	label->set_text(text);
 	label->set_font_size(16);
-
-	m_gui.get_root_widget()->get_layout()->add_widget(label);
 
 	return std::move(label);
 }
@@ -235,8 +243,6 @@ std::shared_ptr<Label> RoomsList::create_button(const std::wstring & text)
 		CursorManager::set_style(CursorManager::Normal);
 		widget->set_background_color(sf::Color(180, 180, 180, 255));
 	});
-
-	m_gui.get_root_widget()->get_layout()->add_widget(button);
 
 	return std::move(button);
 }
@@ -272,8 +278,6 @@ std::shared_ptr<TextBox> RoomsList::create_textbox()
 	text_box->bind(Widget::Unfocus, [](Widget* widget) {
 		widget->set_outline_color(sf::Color(120, 120, 120, 200));
 	});
-
-	m_gui.get_root_widget()->get_layout()->add_widget(text_box);
 
 	return std::move(text_box);
 }
