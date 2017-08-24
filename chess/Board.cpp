@@ -7,16 +7,22 @@ Board::Board() :
 	m_cell_size(74.0f, 74.0f), m_board_size(700.0f, 700.0f), m_board_padding(54.0f, 54.0f),
 	m_is_initialized(false)
 {
-	// Board sprite init
+	// Board sprites init
 	sf::Texture* board_texture = AssetManager::get<sf::Texture>("game_chess_board");
 	board_texture->setSmooth(true);
 
+	sf::Texture* board_shadow_texture = AssetManager::get<sf::Texture>("game_board_shadow");
+	board_shadow_texture->setSmooth(true);
+
 	m_board_size = vec2(board_texture->getSize());
+	setOrigin(m_board_size / 2.0f);
 	
 	m_board_sprite.setTexture(*board_texture, true);
 	m_board_sprite.setOrigin(m_board_size / 2.0f);
+
+	m_board_shadow_sprite.setTexture(*board_shadow_texture, true);
+	m_board_shadow_sprite.setOrigin(m_board_size / 2.0f);
 	
-	setOrigin(m_board_size / 2.0f);
 
 	// Figures sprites init
 	sf::Texture* figures_texture = AssetManager::get<sf::Texture>("game_figures");
@@ -51,30 +57,30 @@ void Board::init_field()
 	}
 
 	for (char x = 0; x < 8; ++x) {
-		set_figure(x, 1, Figure(Figure::Color::White, Figure::Type::Pawn, x));
-		set_figure(x, 6, Figure(Figure::Color::Black, Figure::Type::Pawn, x));
+		set_figure(x, 1, Figure(Figure::Color::White, Figure::Type::Pawn));
+		set_figure(x, 6, Figure(Figure::Color::Black, Figure::Type::Pawn));
 	}
 
-	set_figure(0, 0, Figure(Figure::Color::White, Figure::Type::Rook, 0));
-	set_figure(7, 0, Figure(Figure::Color::White, Figure::Type::Rook, 1));
-	set_figure(0, 7, Figure(Figure::Color::Black, Figure::Type::Rook, 0));
-	set_figure(7, 7, Figure(Figure::Color::Black, Figure::Type::Rook, 1));
+	set_figure(0, 0, Figure(Figure::Color::White, Figure::Type::Rook));
+	set_figure(7, 0, Figure(Figure::Color::White, Figure::Type::Rook));
+	set_figure(0, 7, Figure(Figure::Color::Black, Figure::Type::Rook));
+	set_figure(7, 7, Figure(Figure::Color::Black, Figure::Type::Rook));
 
-	set_figure(1, 0, Figure(Figure::Color::White, Figure::Type::Knight, 0));
-	set_figure(6, 0, Figure(Figure::Color::White, Figure::Type::Knight, 1));
-	set_figure(1, 7, Figure(Figure::Color::Black, Figure::Type::Knight, 0));
-	set_figure(6, 7, Figure(Figure::Color::Black, Figure::Type::Knight, 1));
+	set_figure(1, 0, Figure(Figure::Color::White, Figure::Type::Knight));
+	set_figure(6, 0, Figure(Figure::Color::White, Figure::Type::Knight));
+	set_figure(1, 7, Figure(Figure::Color::Black, Figure::Type::Knight));
+	set_figure(6, 7, Figure(Figure::Color::Black, Figure::Type::Knight));
 
-	set_figure(2, 0, Figure(Figure::Color::White, Figure::Type::Bishop, 0));
-	set_figure(5, 0, Figure(Figure::Color::White, Figure::Type::Bishop, 1));
-	set_figure(2, 7, Figure(Figure::Color::Black, Figure::Type::Bishop, 0));
-	set_figure(5, 7, Figure(Figure::Color::Black, Figure::Type::Bishop, 1));
+	set_figure(2, 0, Figure(Figure::Color::White, Figure::Type::Bishop));
+	set_figure(5, 0, Figure(Figure::Color::White, Figure::Type::Bishop));
+	set_figure(2, 7, Figure(Figure::Color::Black, Figure::Type::Bishop));
+	set_figure(5, 7, Figure(Figure::Color::Black, Figure::Type::Bishop));
 
-	set_figure(3, 0, Figure(Figure::Color::White, Figure::Type::Queen, 0));
-	set_figure(4, 0, Figure(Figure::Color::White, Figure::Type::King, 0));
+	set_figure(3, 0, Figure(Figure::Color::White, Figure::Type::Queen));
+	set_figure(4, 0, Figure(Figure::Color::White, Figure::Type::King));
 
-	set_figure(3, 7, Figure(Figure::Color::Black, Figure::Type::Queen, 0));
-	set_figure(4, 7, Figure(Figure::Color::Black, Figure::Type::King, 0));
+	set_figure(3, 7, Figure(Figure::Color::Black, Figure::Type::Queen));
+	set_figure(4, 7, Figure(Figure::Color::Black, Figure::Type::King));
 
 	m_is_initialized = true;
 }
@@ -208,7 +214,12 @@ std::vector<vec2c> Board::get_possible_moves(const vec2c & position) const
 
 void Board::draw_board(sf::RenderTarget * target)
 {
-	m_board_sprite.setPosition(getPosition());
+	vec2 board_position = getPosition();
+
+	m_board_shadow_sprite.setPosition(board_position);
+	target->draw(m_board_shadow_sprite);
+
+	m_board_sprite.setPosition(board_position);
 	target->draw(m_board_sprite);
 }
 
@@ -277,13 +288,22 @@ std::vector<vec2c> Board::get_moves_pawn(Figure * figure) const
 	vec2c diagonal_left;
 	vec2c diagonal_right;
 	vec2c forward;
+	vec2c fast_forward;
 
 	if (figure->get_color() == Figure::Color::White) {
 		diagonal_left = position + vec2c(-1, 1);
 		diagonal_right = position + vec2c(1, 1);
 		forward = position + vec2c(0, 1);
+		fast_forward = position + vec2c(0, 2);
 
-		if (position.y == 1) {
+		if (position.y == 1 &&
+			(
+				get_figure(fast_forward) == nullptr ||
+
+				get_figure(fast_forward) != nullptr && 
+				get_figure(fast_forward)->get_color() != figure->get_color()
+			))
+		{
 			moves.push_back(position + vec2c(0, 2));
 		}
 	}
@@ -291,8 +311,16 @@ std::vector<vec2c> Board::get_moves_pawn(Figure * figure) const
 		diagonal_left = position - vec2c(-1, 1);
 		diagonal_right = position - vec2c(1, 1);
 		forward = position - vec2c(0, 1);
+		fast_forward = position - vec2c(0, 2);
 
-		if (position.y == 6) {
+		if (position.y == 6 &&
+			(
+				get_figure(fast_forward) == nullptr ||
+
+				get_figure(fast_forward) != nullptr &&
+				get_figure(fast_forward)->get_color() != figure->get_color()
+			))
+		{
 			moves.push_back(position - vec2c(0, 2));
 		}
 	}

@@ -15,12 +15,13 @@ public:
 		Knight,
 		Bishop,
 		Queen,
-		King
+		King,
+
+		Empty = 0x3F
 	};
 
 	Figure(char description);
-	Figure(char color, char type, char number);
-	Figure(char description, char position);
+	Figure(char color, char type);
 
 	void set_description(char description);
 	char get_description() const;
@@ -37,13 +38,12 @@ public:
 	void set_type(char type);
 	char get_type() const;
 
-	void set_number(char number);
-	char get_number() const;
-
+	bool was_moved() const;
 private:
 	vec2c m_position;
 
 	char m_color;
 	char m_type;
-	char m_number;
+
+	bool m_was_moved;
 };

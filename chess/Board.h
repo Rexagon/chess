@@ -62,6 +62,7 @@ private:
 	vec2 m_board_padding;
 
 	sf::Sprite m_board_sprite;
+	sf::Sprite m_board_shadow_sprite;
 	std::vector<sf::Sprite> m_figure_sprites;
 
 	bool m_is_initialized;

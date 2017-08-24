@@ -1,31 +1,25 @@
 #include "Figure.h"
 
 Figure::Figure(char description) :
-	m_position(127, 127)
+	m_position(127, 127), m_was_moved(false)
 {
 	set_description(description);
 }
 
-Figure::Figure(char color, char type, char number) :
-	m_color(color), m_type(type), m_number(number), m_position(127, 127)
+Figure::Figure(char color, char type) :
+	m_color(color), m_type(type), m_position(127, 127), m_was_moved(false)
 {
-}
-
-Figure::Figure(char description, char position)
-{
-	set_description(description);
-	set_position(position);
 }
 
 void Figure::set_description(char description)
 {
-	m_color = (description & Color::White) == Color::White;
-	m_type = description & (0x38);
+	m_color = ((description & 0x40) >> 6) == Color::White;
+	m_type = description & 0x3F;
 }
 
 char Figure::get_description() const
 {
-	return (m_color << 6) | (m_type << 3) | (m_number & 0x07);
+	return (m_color << 6) | (m_type & 0x3F);
 }
 
 void Figure::set_position(char x, char y)
@@ -73,12 +67,7 @@ char Figure::get_type() const
 	return m_type;
 }
 
-void Figure::set_number(char number)
+bool Figure::was_moved() const
 {
-	m_number = number;
-}
-
-char Figure::get_number() const
-{
-	return m_number;
+	return m_was_moved;
 }

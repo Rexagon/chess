@@ -137,10 +137,31 @@ void GameSession::init_board_gui()
 	m_widget_board = m_gui.create<Widget>();
 	Layout* board_layout = new Layout(m_widget_board);
 
-	auto press_function = [this](Widget* widget, const vec2c& current_move) {
+	auto hover_function = [this](Widget* widget, const vec2c& widget_coords) {
+		sf::Color widget_color = sf::Color(100, 100, 100, 100);
+
 		for (const auto& possible_move : this->m_possible_moves) {
-			if (current_move == possible_move) {
-				this->m_board.move_figure(m_selected_cell, current_move);
+			if (widget_coords == possible_move) {
+				CursorManager::set_style(CursorManager::Hand);
+				widget->set_background_color(widget_color);
+				return;
+			}
+		}
+
+		if (this->m_board.can_select(widget_coords)) {
+			CursorManager::set_style(CursorManager::Hand);
+			widget->set_background_color(widget_color);
+			return;
+		}
+	};
+	auto unhover_function = [this](Widget* widget, const vec2c& widget_coords) {
+		CursorManager::set_style(CursorManager::Normal);
+		widget->set_background_color(sf::Color::Transparent);
+	};
+	auto press_function = [this](Widget* widget, const vec2c& widget_coords) {
+		for (const auto& possible_move : this->m_possible_moves) {
+			if (widget_coords == possible_move) {
+				this->m_board.move_figure(m_selected_cell, widget_coords);
 
 				this->set_cell_highlight(this->m_selected_widget, HighlightDisabled);
 
@@ -156,7 +177,7 @@ void GameSession::init_board_gui()
 			}
 		}
 
-		if (this->m_board.can_select(current_move)) {
+		if (this->m_board.can_select(widget_coords)) {
 			if (this->m_selected_widget != nullptr) {
 				this->set_cell_highlight(this->m_selected_widget, HighlightDisabled);
 
@@ -167,9 +188,9 @@ void GameSession::init_board_gui()
 
 			this->set_cell_highlight(widget, HighlightSelected);
 
-			this->m_selected_cell = current_move;
+			this->m_selected_cell = widget_coords;
 			this->m_selected_widget = widget;
-			this->m_possible_moves = this->m_board.get_possible_moves(current_move.x, current_move.y);
+			this->m_possible_moves = this->m_board.get_possible_moves(widget_coords.x, widget_coords.y);
 
 			for (const auto& possible_move : this->m_possible_moves) {
 				this->set_cell_highlight(this->m_cell_widgets[possible_move.x * 8 + possible_move.y].get(), HighlightPossible);
@@ -188,7 +209,8 @@ void GameSession::init_board_gui()
 		}
 	};
 
-	auto release_function = [this](Widget* widget, const vec2c& current_move) {
+	auto release_function = [this](Widget* widget, const vec2c& widget_coords) {
+		CursorManager::set_style(CursorManager::Normal);
 	};
 
 	for (unsigned int i = 0; i < 8; ++i) {
@@ -196,19 +218,21 @@ void GameSession::init_board_gui()
 			std::shared_ptr<Widget> cell_widget = m_gui.create<Widget>();
 			cell_widget->set_size(m_board.get_cell_size());
 
-			vec2c current_move;
+			vec2c widget_coords;
 			if (m_player_type == WhitePlayer) {
-				current_move = vec2c(i, 7 - j);
+				widget_coords = vec2c(i, 7 - j);
 			}
 			else {
-				current_move = vec2c(7 - i, j);
+				widget_coords = vec2c(7 - i, j);
 			}
 
-			cell_widget->bind(Widget::Press, std::bind(press_function, std::placeholders::_1, current_move));
-			cell_widget->bind(Widget::Release, std::bind(release_function, std::placeholders::_1, current_move));
+			cell_widget->bind(Widget::Hover, std::bind(hover_function, std::placeholders::_1, widget_coords));
+			cell_widget->bind(Widget::Unhover, std::bind(unhover_function, std::placeholders::_1, widget_coords));
+			cell_widget->bind(Widget::Press, std::bind(press_function, std::placeholders::_1, widget_coords));
+			cell_widget->bind(Widget::Release, std::bind(release_function, std::placeholders::_1, widget_coords));
 
 			board_layout->add_widget(cell_widget);
-			m_cell_widgets[current_move.x * 8 + current_move.y] = cell_widget;
+			m_cell_widgets[widget_coords.x * 8 + widget_coords.y] = cell_widget;
 		}
 	}
 
