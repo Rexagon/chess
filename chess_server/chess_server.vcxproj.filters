@@ -32,6 +32,9 @@
     <ClCompile Include="Figure.cpp">
       <Filter>server\room\ChessBoard\Figure</Filter>
     </ClCompile>
+    <ClCompile Include="Stuff.cpp">
+      <Filter>stuff</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommandPacket.h">
@@ -64,6 +67,9 @@
     <ClInclude Include="Figure.h">
       <Filter>server\room\ChessBoard\Figure</Filter>
     </ClInclude>
+    <ClInclude Include="Stuff.h">
+      <Filter>stuff</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="server">
@@ -95,6 +101,9 @@
     </Filter>
     <Filter Include="server\room\ChessBoard\Figure">
       <UniqueIdentifier>{af22f884-ec37-44c3-b3dc-926f99675669}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stuff">
+      <UniqueIdentifier>{91415c58-3a9f-4489-982d-4afe3cd1927e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

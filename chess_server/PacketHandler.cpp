@@ -493,44 +493,71 @@ PacketHandler::PacketHandler(Server * server) : m_server(server)
 		},
 
 		/*
-		** ==== Figure descripton ====
-		**  _______________
-		** |_|_|_|_|_|_|_|_|
-		**  7 6 5 4 3 2 1 0
+		** ==== Figure description ====
+		** 
+		** 1 argument - move figure
+		** 2 arguments - pawn has reached to the other end and change ne figure
+		** 3 arguments - castling
 		**
-		** ---- COLORS ----
-		** White     = 00......
-		** Black     = 11......
-		**
-		** ---- TYPES ----
-		** Pawn      = ..001...
-		** Knight    = ..010...
-		** Bishop    = ..011...
-		** Rook      = ..100...
-		** Queen     = ..101...
-		** King      = ..110...
-		**
-		** ---- NUMBER ----
-		** Number ID = .....001
-		** ...
-		** Number ID = .....111
-		**
-		** ==== Figure position ====
-		**  _______________
-		** |_|_|_|_|_|_|_|_|
-		**  7 6 5 4 3 2 1 0
-		**
-		** ---- POSITION ----
-		** Coord X = 0111....
-		** Coord Y = ....0111
-		**
-		** (15, 15) == 11111111 - the figure is dead
+		** -- REQUEST --
+		** {
+		**     room_name,
+		**     [old_position, new_position],
+		**     [....],
+		** }
+		** -- RESPONSE --
+		** {
+		**     [old_position, new_position],
+		**     [....],
+		** }
 		**/
 		{
 			CommandPacket::FigureMove,
 			[this](User* user, CommandPacket packet) {
-				if (packet.get_arguments_count() == 2) {
+				if (packet.get_arguments_count() >= 2) {
+					Room* current_room = nullptr;
+					for (std::list<std::unique_ptr<Room>>::iterator it_room = m_server->m_rooms.begin(); it_room != m_server->m_rooms.end(); it_room++) {
+						if ((*it_room)->get_name() == packet.get_arguments()[0]) {
+							current_room = it_room->get();
+							break;
+						}
+					}
 
+					// Checking for the existence of the room
+					if (current_room == nullptr) {
+						return;
+					}
+
+					bool has_moved = false;
+
+					// Moving figure
+					if (packet.get_arguments_count() == 2) {
+						has_moved = current_room->get_chess_board()->move(packet.get_arguments()[1]);
+					}
+					// Changing pawn
+					else if (packet.get_arguments_count() == 3) {
+						has_moved = current_room->get_chess_board()->move(packet.get_arguments()[1]);
+
+						if (has_moved) {
+							has_moved = current_room->get_chess_board()->pawn_changes(packet.get_arguments()[1], packet.get_arguments()[2]);
+						}
+					}
+					// Castling
+					else if (packet.get_arguments_count() == 4) {
+						has_moved = current_room->get_chess_board()->castling(packet.get_arguments()[0], packet.get_arguments()[1]);
+					}
+
+					if (has_moved) {
+						// Prepare packet
+						std::vector<std::wstring> sending_data;
+						for (size_t k = 1; k < packet.get_arguments_count(); k++) {
+							sending_data.push_back(packet.get_arguments()[k]);
+						}
+						CommandPacket sending_packet(CommandPacket::FigureMove, sending_data);
+						for (std::list<User*>::iterator it_user = current_room->get_users_list().begin(); it_user != current_room->get_users_list().end(); it_user++) {
+							send((*it_user), sending_packet);
+						}
+					}
 				}
 			}
 		},
@@ -653,7 +680,6 @@ void PacketHandler::handler()
 
 										it_event->second(user, packet);
 									}, it_user->get(), packet).detach();
-									//std::thread(it_event->second, it_user->get(), packet).detach();
 								}
 							}
 

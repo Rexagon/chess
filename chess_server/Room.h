@@ -11,6 +11,7 @@
 
 #include "User.h"
 #include "CommandPacket.h"
+#include "ChessBoard.h"
 
 class Room {
 public:
@@ -42,8 +43,12 @@ public:
 	unsigned int get_spectator_count() const;
 
 	std::list<User*>& get_users_list();
+
+	ChessBoard* get_chess_board();
 private:
 	std::list<User*> m_users;
+
+	ChessBoard m_chess_board;
 
 	std::wstring m_name;
 

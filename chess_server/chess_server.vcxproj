@@ -94,6 +94,7 @@
     <ClCompile Include="RoomManager.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="SHA256.cpp" />
+    <ClCompile Include="Stuff.cpp" />
     <ClCompile Include="Truelog.cpp" />
     <ClCompile Include="User.cpp" />
   </ItemGroup>
@@ -106,6 +107,7 @@
     <ClInclude Include="RoomManager.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="SHA256.h" />
+    <ClInclude Include="Stuff.h" />
     <ClInclude Include="Truelog.h" />
     <ClInclude Include="User.h" />
   </ItemGroup>

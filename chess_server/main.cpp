@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 		port = atoi(console::getArguments("port")[0].c_str());
 	}
 
-	Truelog::init("server_log.txt");
+	Truelog::init("server.log");
 
 	try {
 		Server server(port);

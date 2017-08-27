@@ -1,6 +1,6 @@
 #include "Room.h"
 
-Room::Room() : m_privacy(false), m_is_chat_enabled(false), m_name(L""), m_owner(L""), m_white_player(L""), m_black_player(L"")
+Room::Room() : m_privacy(false), m_is_chat_enabled(false), m_name(L""), m_owner(L""), m_white_player(L""), m_black_player(L""), m_chess_board(this)
 {
 }
 
@@ -15,7 +15,8 @@ Room::Room(const std::wstring& name,
 	m_white_player(white_player),
 	m_black_player(black_player),
 	m_privacy(is_private),
-	m_is_chat_enabled(chat_enabled)
+	m_is_chat_enabled(chat_enabled),
+	m_chess_board(this)
 {
 }
 
@@ -139,4 +140,9 @@ unsigned int Room::get_spectator_count() const
 std::list<User*>& Room::get_users_list()
 {
 	return m_users;
+}
+
+ChessBoard * Room::get_chess_board()
+{
+	return &m_chess_board;
 }

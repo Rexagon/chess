@@ -8,11 +8,7 @@
 #include <string>
 #include <mutex>
 
-std::wostream & operator<<(std::wostream& stream, const std::string& s);
-
-namespace std {
-	std::wstring to_wstring(const std::string& str);
-}
+#include "Stuff.h"
 
 class Truelog {
 //private:
@@ -59,8 +55,6 @@ private:
 	Truelog(const Truelog&) = delete;
 	Truelog(Truelog::StreamType stream) {}
 
-	static const std::string GetDate();
-
 	static std::wofstream m_logFile;
 
 	static Truelog::StreamType m_streamType;
@@ -78,22 +72,22 @@ private:
 		LogHelper& operator<<(const Truelog::Type& type)
 		{
 			std::wstring output;
-			std::wstring tmp_date = std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().from_bytes(GetDate());
+			std::wstring tmp_date = Stuff::time_to_wstring(Stuff::get_current_time());
 			switch (type)
 			{
 			case Truelog::Type::Info:
-				output = L"[INFO] " + tmp_date + L": ";
+				output = L"[INFO] [" + tmp_date + L"]: ";
 				break;
 			case Truelog::Type::Error:
-				output = L"[ERROR] " + tmp_date + L": ";
+				output = L"[ERROR] [" + tmp_date + L"]: ";
 				m_owner->m_errorCount++;
 				break;
 			case Truelog::Type::Warning:
-				output = L"[WARNING] " + tmp_date + L": ";
+				output = L"[WARNING] [" + tmp_date + L"]: ";
 				m_owner->m_warningCount++;
 				break;
 			case Truelog::Type::Debug:
-				output = L"[DEBUG] " + tmp_date + L": ";
+				output = L"[DEBUG] [" + tmp_date + L"]: ";
 				break;
 			default:
 				break;
