@@ -297,7 +297,7 @@ void ChessBoard::init()
 
 void ChessBoard::reinit()
 {
-	open_log_file(m_room->get_file_path(), std::ios::out | std::ios::trunc | std::ios::binary);
+	open_log_file(m_room->get_file_path(), std::fstream::out | std::fstream::trunc | std::fstream::binary);
 	setup_default_board();
 
 	Truelog::sync_print([&]() {
@@ -642,81 +642,79 @@ void ChessBoard::read_from_file()
 {
 	Truelog::stream() << m_room->get_file_path();
 
-	open_log_file(m_room->get_file_path(), std::ios::in | std::ios::binary);
+	if (open_log_file(m_room->get_file_path(), std::fstream::in | std::fstream::binary)) {
+		while (!m_board_file.eof()) {
+			unsigned int size = 0;
+			m_board_file.read(reinterpret_cast<char *>(&size), sizeof(size));
 
-	//m_board_file.seekg(0, m_board_file.beg);
+			switch (size) {
+			case 2:
+			{
+				Figure::Position old_pos;
+				Figure::Position new_pos;
 
-	while (!m_board_file.eof()) {
-		unsigned int size = 0;
-		m_board_file.read(reinterpret_cast<char *>(&size), sizeof(size));
+				m_board_file.read(reinterpret_cast<char *>(&old_pos), sizeof(Figure::Position));
+				m_board_file.read(reinterpret_cast<char *>(&new_pos), sizeof(Figure::Position));
 
-		switch (size) {
-		case 2:
-		{
-			Figure::Position old_pos;
-			Figure::Position new_pos;
-
-			m_board_file.read(reinterpret_cast<char *>(&old_pos), sizeof(Figure::Position));
-			m_board_file.read(reinterpret_cast<char *>(&new_pos), sizeof(Figure::Position));
-
-			bool has_moved = move(old_pos, new_pos);
-			if (!has_moved) {
-				throw std::exception("Error during reading from file (figure movement)");
+				bool has_moved = move(old_pos, new_pos);
+				if (!has_moved) {
+					throw std::exception("Error during reading from file (figure movement)");
+				}
+				break;
 			}
-			break;
-		}
-		case 3:
-		{
-			Figure::Position current_pos;
-			unsigned char type;
+			case 3:
+			{
+				Figure::Position current_pos;
+				unsigned char type;
 
-			m_board_file.read(reinterpret_cast<char *>(&current_pos), sizeof(Figure::Position));
-			m_board_file.read(reinterpret_cast<char *>(&type), sizeof(unsigned char));
+				m_board_file.read(reinterpret_cast<char *>(&current_pos), sizeof(Figure::Position));
+				m_board_file.read(reinterpret_cast<char *>(&type), sizeof(unsigned char));
 
-			m_board_file.seekg(1, m_board_file.cur);
+				m_board_file.seekg(1, m_board_file.cur);
 
-			bool has_changed = changing_pawn(current_pos, type);
-			if (!has_changed) {
-				throw std::exception("Error during reading from file (pawn changing)");
+				bool has_changed = changing_pawn(current_pos, type);
+				if (!has_changed) {
+					throw std::exception("Error during reading from file (pawn changing)");
+				}
+				break;
 			}
-			break;
-		}
-		case 4:
-		{
-			Figure::Position king_old_pos;
-			Figure::Position king_new_pos;
-			Figure::Position rook_old_pos;
-			Figure::Position rook_new_pos;
+			case 4:
+			{
+				Figure::Position king_old_pos;
+				Figure::Position king_new_pos;
+				Figure::Position rook_old_pos;
+				Figure::Position rook_new_pos;
 
-			m_board_file.read(reinterpret_cast<char *>(&king_old_pos), sizeof(Figure::Position));
-			m_board_file.read(reinterpret_cast<char *>(&king_new_pos), sizeof(Figure::Position));
-			m_board_file.read(reinterpret_cast<char *>(&rook_old_pos), sizeof(Figure::Position));
-			m_board_file.read(reinterpret_cast<char *>(&rook_new_pos), sizeof(Figure::Position));
+				m_board_file.read(reinterpret_cast<char *>(&king_old_pos), sizeof(Figure::Position));
+				m_board_file.read(reinterpret_cast<char *>(&king_new_pos), sizeof(Figure::Position));
+				m_board_file.read(reinterpret_cast<char *>(&rook_old_pos), sizeof(Figure::Position));
+				m_board_file.read(reinterpret_cast<char *>(&rook_new_pos), sizeof(Figure::Position));
 
-			bool has_castled = castling(king_old_pos, king_new_pos, rook_old_pos, rook_new_pos);
-			if (!has_castled) {
-				throw std::exception("Error during reading from file (castling)");
+				bool has_castled = castling(king_old_pos, king_new_pos, rook_old_pos, rook_new_pos);
+				if (!has_castled) {
+					throw std::exception("Error during reading from file (castling)");
+				}
+				break;
 			}
-			break;
+			case 0:
+			{
+				Truelog::stream() << Truelog::Type::Error << "Size is zero";
+				// TODO: make end of the game
+				return;
+			}
+			default:
+			{
+				// TODO:: make error
+				Truelog::stream() << Truelog::Type::Warning << "File is empty";
+				return;
+			}
+			}
+			m_board_file.seekg(4, m_board_file.cur);
 		}
-		case 0:
-		{
-			Truelog::stream() << Truelog::Type::Error << "Size is zero";
-			// TODO: make end of the game
-			return;
-		}
-		default:
-		{
-			// TODO:: make error
-			Truelog::stream() << Truelog::Type::Warning << "File is empty";
-			return;
-		}
-		}
-		m_board_file.seekg(4, m_board_file.cur);
+		m_board_file.close();
 	}
 
-	m_board_file.close();
-	open_log_file(m_room->get_file_path(), std::ios::out | std::ios::binary | std::ios::app);
+	open_log_file(m_room->get_file_path(), std::fstream::out | std::fstream::binary | std::fstream::app);
 }
 
 void ChessBoard::write_to_file(const std::vector<unsigned char>& args)
@@ -769,7 +767,7 @@ unsigned int ChessBoard::get_turn_number() const
 	return m_turn_number;
 }
 
-void ChessBoard::open_log_file(const std::wstring & path, int mods)
+bool ChessBoard::open_log_file(const std::wstring & path, int mods)
 {
 	if (m_board_file.is_open()) {
 		m_board_file.close();
@@ -777,9 +775,7 @@ void ChessBoard::open_log_file(const std::wstring & path, int mods)
 
 	m_board_file.open(path, mods);
 
-	if (!m_board_file.is_open()) {
-		throw std::exception("Board log could not open");
-	}
+	return m_board_file.is_open();
 }
 
 std::vector<std::wstring> ChessBoard::get_board_state()

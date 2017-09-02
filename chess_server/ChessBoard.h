@@ -43,7 +43,7 @@ public:
 
 	unsigned int get_turn_number() const;
 
-	void open_log_file(const std::wstring& path, int mods);
+	bool open_log_file(const std::wstring& path, int mods);
 
 	std::vector<std::wstring> get_board_state();
 private:
