@@ -19,6 +19,7 @@ public:
 		ChangeRoom,
 		SendMessage,
 		RoomSettings,
+		BoardState,
 
 		TypesCount
 	};

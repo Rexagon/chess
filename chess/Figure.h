@@ -38,7 +38,12 @@ public:
 	void set_type(char type);
 	char get_type() const;
 
+	void set_moved(bool moved = true);
 	bool was_moved() const;
+
+	static char pack_position(const vec2c& position);
+	static vec2c unpack_position(char position);
+
 private:
 	vec2c m_position;
 

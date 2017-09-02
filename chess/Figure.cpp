@@ -13,7 +13,7 @@ Figure::Figure(char color, char type) :
 
 void Figure::set_description(char description)
 {
-	m_color = ((description & 0x40) >> 6) == Color::White;
+	m_color = ((description & 0x40) >> 6) == Color::Black;
 	m_type = description & 0x3F;
 }
 
@@ -34,7 +34,7 @@ void Figure::set_position(const vec2c & position)
 
 void Figure::set_position(char packed_position)
 {
-	m_position = vec2c((packed_position & 0xF0) >> 4, packed_position & 0x0F);
+	m_position = unpack_position(packed_position);
 }
 
 vec2c Figure::get_position() const
@@ -44,7 +44,7 @@ vec2c Figure::get_position() const
 
 char Figure::get_packed_position() const
 {
-	return (m_position.x << 4) | (m_position.y & 0x0F);
+	return pack_position(m_position);
 }
 
 void Figure::set_color(char color)
@@ -67,7 +67,22 @@ char Figure::get_type() const
 	return m_type;
 }
 
+void Figure::set_moved(bool moved)
+{
+	m_was_moved = moved;
+}
+
 bool Figure::was_moved() const
 {
 	return m_was_moved;
+}
+
+char Figure::pack_position(const vec2c & position)
+{
+	return (position.x << 4) | (position.y & 0x0F);
+}
+
+vec2c Figure::unpack_position(char position)
+{
+	return vec2c((position & 0xF0) >> 4, position & 0x0F);
 }

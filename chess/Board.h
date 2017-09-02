@@ -42,6 +42,10 @@ public:
 	vec2 get_size() const;
 	vec2 get_padding() const;
 
+	void set_turn(unsigned int turn_number);
+	void end_turn();
+	Figure::Color get_turn() const;
+
 	static bool is_position_valid(char x, char y);
 	static bool is_position_valid(const vec2c& position);
 
@@ -64,6 +68,8 @@ private:
 	sf::Sprite m_board_sprite;
 	sf::Sprite m_board_shadow_sprite;
 	std::vector<sf::Sprite> m_figure_sprites;
+
+	unsigned int m_turn_number;
 
 	bool m_is_initialized;
 };

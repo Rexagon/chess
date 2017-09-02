@@ -13,6 +13,7 @@ void Core::init()
 	ConfigManager::init();
 
 	Client::init("95.84.247.9", 49876);
+	//Client::init("127.0.0.1", 49876);
 
 	m_is_running = false;
 

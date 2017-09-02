@@ -5,7 +5,7 @@
 Board::Board() :
 	m_main_color(Figure::Color::White),
 	m_cell_size(74.0f, 74.0f), m_board_size(700.0f, 700.0f), m_board_padding(54.0f, 54.0f),
-	m_is_initialized(false)
+	m_turn_number(0), m_is_initialized(false)
 {
 	// Board sprites init
 	sf::Texture* board_texture = AssetManager::get<sf::Texture>("game_chess_board");
@@ -87,15 +87,36 @@ void Board::init_field()
 
 void Board::init_field(const std::string & field_file)
 {
-	// TODO: parse file
-
 	m_is_initialized = true;
 }
 
 void Board::init_field(const CommandPacket & packet)
 {
-	// TODO: parse packet
+	for (unsigned int i = 0; i < 8; ++i) {
+		for (unsigned int j = 0; j < 8; ++j) {
+			m_field[i][j].reset(nullptr);
+		}
+	}
 
+	std::vector<std::wstring> arguments = packet.get_arguments();
+
+	if (arguments.size() < 2) {
+		return;
+	}
+
+	m_turn_number = std::stoi(arguments[0]);
+
+	for (size_t i = 1; i < arguments.size(); ++i) {
+		auto& argument = arguments[i];
+
+		if (argument.size() == 2) {
+			char description = static_cast<char>(argument[0]);
+			char position = static_cast<char>(argument[1]);
+
+			set_figure(Figure::unpack_position(position), Figure(description));
+		}
+	}
+	
 	m_is_initialized = true;
 }
 
@@ -109,6 +130,7 @@ void Board::move_figure(const vec2c& origin, const vec2c& destination)
 	Figure* figure = get_figure(origin);
 	if (figure != nullptr) {
 		set_figure(destination, *figure);
+		m_field[destination.x][destination.y]->set_moved(true);
 		m_field[origin.x][origin.y].reset(nullptr);
 	}
 }
@@ -160,7 +182,8 @@ Figure::Color Board::get_main_color() const
 bool Board::can_select(char x, char y) const
 {
 	Figure* figure = get_figure(x, y);
-	return (figure != nullptr) && (figure->get_color() == m_main_color);
+	return (figure != nullptr) && (figure->get_color() == m_main_color) && 
+		(m_turn_number % 2) == m_main_color;
 }
 
 bool Board::can_select(const vec2c & position) const
@@ -267,6 +290,21 @@ vec2 Board::get_size() const
 vec2 Board::get_padding() const
 {
 	return m_board_padding;
+}
+
+void Board::set_turn(unsigned int turn_number)
+{
+	m_turn_number = turn_number;
+}
+
+void Board::end_turn()
+{
+	m_turn_number++;
+}
+
+Figure::Color Board::get_turn() const
+{
+	return static_cast<Figure::Color>(m_turn_number % 2);
 }
 
 bool Board::is_position_valid(char x, char y)
@@ -504,6 +542,39 @@ std::vector<vec2c> Board::get_moves_king(Figure * figure) const
 		}
 		else if (get_figure(temp)->get_color() != m_main_color) {
 			moves.push_back(temp);
+		}
+	}
+
+	if (!figure->was_moved()) {
+		Figure* left_rook = m_field[0][position.y].get();
+		Figure* right_rook = m_field[7][position.y].get();
+
+		if (left_rook != nullptr && !left_rook->was_moved()) {
+			bool can_move = true;
+			for (size_t i = 1; i < position.x; ++i) {
+				if (m_field[i][position.y] != nullptr) {
+					can_move = false;
+					break;
+				}
+			}
+
+			if (can_move) {
+				moves.push_back(position - vec2c(2, 0));
+			}
+		}
+
+		if (right_rook != nullptr && !right_rook->was_moved()) {
+			bool can_move = true;
+			for (size_t i = position.x + 1; i < 7; ++i) {
+				if (m_field[i][position.y] != nullptr) {
+					can_move = false;
+					break;
+				}
+			}
+
+			if (can_move) {
+				moves.push_back(position + vec2c(2, 0));
+			}
 		}
 	}
 
