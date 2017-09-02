@@ -21,7 +21,8 @@ public:
 		const std::wstring& white_player,
 		const std::wstring& black_player,
 		bool is_private,
-		bool chat_enabled);
+		bool chat_enabled,
+		const std::wstring& file_path);
 	~Room();
 
 	int add_user(User* user);
@@ -45,12 +46,14 @@ public:
 	std::list<User*>& get_users_list();
 
 	ChessBoard* get_chess_board();
+	std::wstring get_file_path() const;
 private:
 	std::list<User*> m_users;
 
 	ChessBoard m_chess_board;
 
 	std::wstring m_name;
+	std::wstring m_file_path;
 
 	std::wstring m_owner;
 	std::wstring m_white_player;

@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS "rooms" (
 "user_black"  TEXT,
 "private"  INTEGER NOT NULL DEFAULT 0,
 "chat_enabled"  INTEGER NOT NULL DEFAULT 1,
-"path_to_logs"  TEXT,
+"file_name"  TEXT,
 PRIMARY KEY ("name" ASC),
 CONSTRAINT "user_white_room" FOREIGN KEY ("user_white") REFERENCES "users" ("login") ON DELETE SET NULL ON UPDATE CASCADE,
 CONSTRAINT "user_black_room" FOREIGN KEY ("user_black") REFERENCES "users" ("login") ON DELETE SET NULL ON UPDATE CASCADE,

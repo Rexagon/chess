@@ -31,7 +31,6 @@ public:
 	void stop();
 
 	void send(User* user, CommandPacket packet);
-	void send(User* user, sf::Packet packet);
 
 private:
 	PacketHandler(PacketHandler const&) = delete;

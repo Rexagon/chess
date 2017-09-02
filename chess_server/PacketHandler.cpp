@@ -486,7 +486,7 @@ PacketHandler::PacketHandler(Server * server) : m_server(server)
 			[this](User* user, CommandPacket packet) {
 				if (packet.get_arguments_count() == 1) {
 					if (user->get_room() != nullptr) {
-						
+						User::Role new_role;
 					}
 				}
 			}
@@ -495,9 +495,9 @@ PacketHandler::PacketHandler(Server * server) : m_server(server)
 		/*
 		** ==== Figure description ====
 		** 
-		** 1 argument - move figure
-		** 2 arguments - pawn has reached to the other end and change ne figure
-		** 3 arguments - castling
+		** 2 argument - move figure
+		** 3 arguments - pawn has reached to the other end and change ne figure
+		** 4 arguments - castling
 		**
 		** -- REQUEST --
 		** {
@@ -507,8 +507,39 @@ PacketHandler::PacketHandler(Server * server) : m_server(server)
 		** }
 		** -- RESPONSE --
 		** {
+		**     room_name,
 		**     [old_position, new_position],
 		**     [....],
+		** }
+		**
+		** Pawn changes:
+		** -- REQUEST --
+		** {
+		**     room_name,
+		**     [old_position, new_position],
+		**     new_type_figure
+		** }
+		** -- RESPONSE --
+		** {
+		**     room_name,
+		**     [old_position, new_position],
+		**     new_type_figure
+		** }
+		**
+		** Castling:
+		** -- REQUEST --
+		** {
+		**     room_name,
+		**     [king_old_position, king_new_position],
+		**     [rook_old_position, rook_position],
+		**     empty
+		** }
+		** -- RESPONSE --
+		** {
+		**     room_name,
+		**     [king_old_position, king_new_position],
+		**     [rook_old_position, rook_position],
+		**     empty
 		** }
 		**/
 		{
@@ -528,8 +559,50 @@ PacketHandler::PacketHandler(Server * server) : m_server(server)
 						return;
 					}
 
-					bool has_moved = false;
+					// Checking for the existence player
+					Figure::Color correct_figure_color;
 
+					if (current_room->get_white_player() == user->get_login()) {
+						correct_figure_color = Figure::Color::White;
+					}
+					else if (current_room->get_black_player() == user->get_login()) {
+						correct_figure_color = Figure::Color::Black;
+					}
+					else {
+						return;
+					}
+
+
+
+					if (packet.get_arguments()[1].size() == 2) {
+						Figure* current_figure = current_room->get_chess_board()->get_figure(packet.get_arguments()[1].at(0));
+						if (current_figure != nullptr) {
+							Figure::Color figure_color = current_figure->get_color();
+							if (figure_color != correct_figure_color) {
+								return;
+							}
+						}
+						else {
+							return;
+						}
+					}
+					else {
+						return;
+					}
+
+					// Checking correct moves order
+					if (correct_figure_color == Figure::Color::White) {
+						if (current_room->get_chess_board()->get_turn_number() % 2 != 0) {
+							return;
+						}
+					}
+					else {
+						if (current_room->get_chess_board()->get_turn_number() % 2 != 1) {
+							return;
+						}
+					}
+
+					bool has_moved = false;
 					// Moving figure
 					if (packet.get_arguments_count() == 2) {
 						has_moved = current_room->get_chess_board()->move(packet.get_arguments()[1]);
@@ -539,25 +612,40 @@ PacketHandler::PacketHandler(Server * server) : m_server(server)
 						has_moved = current_room->get_chess_board()->move(packet.get_arguments()[1]);
 
 						if (has_moved) {
-							has_moved = current_room->get_chess_board()->pawn_changes(packet.get_arguments()[1], packet.get_arguments()[2]);
+							has_moved = current_room->get_chess_board()->changing_pawn(packet.get_arguments()[1], packet.get_arguments()[2]);
 						}
 					}
 					// Castling
 					else if (packet.get_arguments_count() == 4) {
-						has_moved = current_room->get_chess_board()->castling(packet.get_arguments()[0], packet.get_arguments()[1]);
+						has_moved = current_room->get_chess_board()->castling(packet.get_arguments()[1], packet.get_arguments()[2]);
 					}
 
 					if (has_moved) {
-						// Prepare packet
-						std::vector<std::wstring> sending_data;
-						for (size_t k = 1; k < packet.get_arguments_count(); k++) {
-							sending_data.push_back(packet.get_arguments()[k]);
-						}
-						CommandPacket sending_packet(CommandPacket::FigureMove, sending_data);
+						//CommandPacket sending_packet(CommandPacket::FigureMove, packet);
 						for (std::list<User*>::iterator it_user = current_room->get_users_list().begin(); it_user != current_room->get_users_list().end(); it_user++) {
-							send((*it_user), sending_packet);
+							send((*it_user), packet);
 						}
 					}
+				}
+			}
+		},
+
+		{
+			CommandPacket::BoardState,
+			[this](User* user, CommandPacket packet) {
+				if (packet.get_arguments_count() == 1) {
+					Room* current_room = nullptr;
+					for (std::list<std::unique_ptr<Room>>::iterator it_room = m_server->m_rooms.begin(); it_room != m_server->m_rooms.end(); it_room++) {
+						if ((*it_room)->get_name() == packet.get_arguments()[0]) {
+							current_room = it_room->get();
+						}
+					}
+					
+					if (current_room == nullptr) {
+						return;
+					}
+
+					send(user, CommandPacket(CommandPacket::BoardState, current_room->get_chess_board()->get_board_state()));
 				}
 			}
 		},
@@ -619,15 +707,19 @@ void PacketHandler::stop()
 
 void PacketHandler::send(User* user, CommandPacket packet)
 {
-	send(user, packet.to_sfml_packet());
-}
-
-void PacketHandler::send(User * user, sf::Packet packet)
-{
-	sf::Socket::Status status = user->get_socket()->send(packet);
+	sf::Socket::Status status = user->get_socket()->send(packet.to_sfml_packet());
 
 	Truelog::sync_print([&]() {
-		Truelog::stream() << Truelog::Type::Info << "Packet sent to user (status=" << status << ", size=" << packet.getDataSize() << ")";
+		std::wstring print_packet = L"";
+		for (size_t i = 0; i < packet.get_arguments_count(); i++) {
+			print_packet += (L"\n    arg[" + std::to_wstring(i) + L"]      = " + packet.get_arguments()[i]);
+		}
+		Truelog::stream() << Truelog::Type::Info << "Packet send to user (status=" << status << ", size=" << packet.to_sfml_packet().getDataSize() << "):"
+			<< "\n{"
+			<< "\n    packet_type = " << CommandPacket::packet_types[packet.get_command()]
+			<< "\n    args_count  = " << packet.get_arguments_count()
+			<< print_packet
+			<< "\n}";
 	});
 }
 

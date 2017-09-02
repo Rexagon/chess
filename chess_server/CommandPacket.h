@@ -20,6 +20,7 @@ public:
 		ChangeRoom,
 		SendMessage,
 		RoomSettings,
+		BoardState,
 
 		TypesCount
 	};
@@ -40,7 +41,7 @@ public:
 
 	void set_arguments(const std::vector<std::wstring>& arguments);
 	std::vector<std::wstring> get_arguments() const;
-	unsigned int get_arguments_count() const;
+	size_t get_arguments_count() const;
 private:
 	bool m_is_valid;
 	signed char m_command;

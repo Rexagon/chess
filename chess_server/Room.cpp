@@ -1,6 +1,6 @@
 #include "Room.h"
 
-Room::Room() : m_privacy(false), m_is_chat_enabled(false), m_name(L""), m_owner(L""), m_white_player(L""), m_black_player(L""), m_chess_board(this)
+Room::Room() : m_privacy(false), m_is_chat_enabled(false), m_name(L""), m_owner(L""), m_white_player(L""), m_black_player(L""), m_file_path(L""), m_chess_board(this)
 {
 }
 
@@ -9,15 +9,18 @@ Room::Room(const std::wstring& name,
 	const std::wstring& white_player,
 	const std::wstring& black_player,
 	bool is_private,
-	bool chat_enabled) :
+	bool chat_enabled,
+	const std::wstring& file_path) :
 	m_name(name),
 	m_owner(owner),
 	m_white_player(white_player),
 	m_black_player(black_player),
 	m_privacy(is_private),
 	m_is_chat_enabled(chat_enabled),
+	m_file_path(file_path),
 	m_chess_board(this)
 {
+	m_chess_board.init();
 }
 
 Room::~Room()
@@ -145,4 +148,9 @@ std::list<User*>& Room::get_users_list()
 ChessBoard * Room::get_chess_board()
 {
 	return &m_chess_board;
+}
+
+std::wstring Room::get_file_path() const
+{
+	return m_file_path;
 }

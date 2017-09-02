@@ -2,7 +2,7 @@
 
 #include "Server.h"
 
-RoomManager::RoomManager(Server* server) : m_server(server)
+RoomManager::RoomManager(Server* server) : m_server(server), m_room_count(0)
 {
 }
 
@@ -24,8 +24,10 @@ void RoomManager::init()
 		std::wstring room_black_player(static_cast<const wchar_t*>(sqlite3_column_text16(statement, 3)));
 		bool room_is_private = static_cast<bool>(sqlite3_column_int(statement, 4));
 		bool room_is_chat_enabled = static_cast<bool>(sqlite3_column_int(statement, 5));
+		std::wstring room_file_path(static_cast<const wchar_t*>(sqlite3_column_text16(statement, 6)));
 
-		m_server->m_rooms.push_back(std::make_unique<Room>(room_name, room_owner, room_white_player, room_black_player, room_is_private, room_is_chat_enabled));
+		m_server->m_rooms.push_back(std::make_unique<Room>(room_name, room_owner, room_white_player, room_black_player, room_is_private, room_is_chat_enabled, room_file_path));
+		m_room_count++;
 	}
 }
 
@@ -59,15 +61,18 @@ Room* RoomManager::change_room_settings(const std::wstring& old_name, const std:
 		action = Action::Update;
 	}
 	else {
-		query = L"INSERT INTO rooms (name, owner, user_white, user_black, private, chat_enabled) VALUES (?, ?, ?, ?, ?, ?)";
-		
+		query = L"INSERT INTO rooms (name, owner, user_white, user_black, private, chat_enabled, file_path) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+		std::wstring path = L"./data/rooms/" + std::to_wstring(m_room_count) + L".log";
+
 		m_server->m_rooms.push_back(std::make_unique<Room>(
 			new_name,
 			owner,
 			white_player,
 			black_player,
 			privacy,
-			chat_enabled
+			chat_enabled,
+			path
 		));
 
 		room = m_server->m_rooms.back().get();
@@ -87,6 +92,11 @@ Room* RoomManager::change_room_settings(const std::wstring& old_name, const std:
 
 	if (action == Action::Update) {
 		sqlite3_bind_text16(statement, 7, old_name.c_str(), -1, 0);
+	}
+	else if (action == Action::Create) {
+		std::wstring path = L"./data/rooms/" + std::to_wstring(m_room_count) + L".log";
+		sqlite3_bind_text16(statement, 7, path.c_str(), -1, 0);
+		m_room_count++;
 	}
 
 	int rc = sqlite3_step(statement);

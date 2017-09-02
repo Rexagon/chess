@@ -56,6 +56,11 @@ std::map<signed char, std::wstring> CommandPacket::packet_types = {
 		CommandPacket::RoomSettings,
 		L"RoomSettings"
 	},
+
+	{
+		CommandPacket::BoardState,
+		L"BoardState"
+	}
 };
 
 CommandPacket::CommandPacket(sf::Packet packet)
@@ -119,7 +124,7 @@ std::vector<std::wstring> CommandPacket::get_arguments() const
 	return m_arguments;
 }
 
-unsigned int CommandPacket::get_arguments_count() const
+size_t CommandPacket::get_arguments_count() const
 {
 	return m_arguments.size();
 }

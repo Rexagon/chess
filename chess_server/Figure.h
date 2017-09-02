@@ -29,7 +29,7 @@ public:
 	Figure(Description description);
 	Figure(Description description, Position position);
 	
-	vec2uc get_pos_vec() const;
+	vec2c get_pos_vec() const;
 	Position get_pos() const;
 	Description get_description() const;
 	Figure::Color get_color() const;
@@ -46,7 +46,7 @@ public:
 	static int get_pos_y(Figure::Position pos);
 	static int get_pos_x(const wchar_t& xy);
 	static int get_pos_y(const wchar_t& xy);
-	static vec2uc get_pos_vec(Figure::Position pos);
+	static vec2c get_pos_vec(Figure::Position pos);
 	static Figure::Position get_pos(int x, int y);
 	static Figure::Position get_pos(const wchar_t& xy);
 	static bool type_is_valid(Figure::Type type);

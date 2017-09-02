@@ -7,6 +7,8 @@
 
 #include "Room.h"
 
+#include "Truelog.h"
+
 class Server;
 
 class RoomManager {
@@ -27,4 +29,6 @@ public:
 	void erase_room(const std::wstring& name);
 private:
 	Server* m_server;
+
+	unsigned int m_room_count;
 };

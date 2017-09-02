@@ -12,9 +12,9 @@ Figure::Figure(Description description, Position position) : m_description(descr
 {
 }
 
-vec2uc Figure::get_pos_vec() const
+vec2c Figure::get_pos_vec() const
 {
-	return vec2uc(this->get_pos_x(), this->get_pos_y());
+	return vec2c(this->get_pos_x(), this->get_pos_y());
 }
 
 Figure::Position Figure::get_pos() const
@@ -55,7 +55,7 @@ bool Figure::has_moved() const
 
 int Figure::get_pos_x(Figure::Position pos)
 {
-	return static_cast<int>(pos & 0xF0);
+	return static_cast<int>(pos >> 4) ;
 }
 
 int Figure::get_pos_y(Figure::Position pos)
@@ -73,23 +73,22 @@ int Figure::get_pos_y(const wchar_t & xy)
 	return Figure::get_pos_y(Figure::get_pos(xy));
 }
 
-vec2uc Figure::get_pos_vec(Figure::Position pos)
+vec2c Figure::get_pos_vec(Figure::Position pos)
 {
-	return vec2uc(Figure::get_pos_x(pos), Figure::get_pos_y(pos));
+	return vec2c(Figure::get_pos_x(pos), Figure::get_pos_y(pos));
 }
 
 Figure::Position Figure::get_pos(int x, int y)
 {
-	Figure::Position pos = (static_cast<unsigned char>(x) << 4);
+	Figure::Position pos = static_cast<unsigned char>(x << 4);
 	pos |= static_cast<unsigned char>(y);
 	return pos;
 }
 
 Figure::Position Figure::get_pos(const wchar_t & xy)
 {
-	unsigned char x = static_cast<unsigned char>(xy >> 4);
-	unsigned char y = static_cast<unsigned char>(xy & 0xF);
-
+	unsigned char x = static_cast<unsigned char>((xy & 0x00F0) >> 4);
+	unsigned char y = static_cast<unsigned char>(xy & 0x000F);
 	return Figure::get_pos(x, y);
 }
 
@@ -105,7 +104,7 @@ bool Figure::type_is_valid(Figure::Type type)
 
 int Figure::get_pos_x() const
 {
-	return static_cast<int>(m_position & 0xF0);
+	return static_cast<int>(m_position >> 4);
 }
 
 int Figure::get_pos_y() const
